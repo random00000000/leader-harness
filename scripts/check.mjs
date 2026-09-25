@@ -35,7 +35,10 @@ for (const f of readdirSync(join(root, 'styles'))) {
   try {
     const html = composeDocument(b, style, ctx);
     if (!html.includes(b.title) && !html.includes('Welcome')) throw new Error('title missing from output');
-    if (!html.includes('data-decide')) throw new Error('decision button missing');
+    // Every format must let the Leader decide inside the report.
+    for (const mark of ['class="lh-decision"', 'class="lh-opt rec"', 'data-confirm', 'lh-decision {']) {
+      if (!html.includes(mark)) throw new Error(`in-report decision controls missing (${mark})`);
+    }
     console.log(`ok   style ${style.id} (${html.length} bytes)`);
   } catch (e) {
     failed++;

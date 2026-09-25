@@ -1,6 +1,6 @@
 // Leader Harness: Electron main process. Owns state, the scheduler, the tray,
 // notifications, and the IPC surface the renderer uses.
-const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, Notification, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, Notification, nativeImage, screen } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { Store, id } = require('./store');
@@ -15,7 +15,9 @@ const ROOT = path.join(__dirname, '..', '..');
 const BUILTIN_STYLES = path.join(ROOT, 'styles');
 
 // Development: LH_USER_DATA isolates state; LH_CAPTURE="<dir>" screenshots
-// each route (LH_ROUTES, one per line; "route|js" runs js first) and quits.
+// each route (LH_ROUTES, one per line; "route|js" runs js first, steps split
+// by "||then||", "frame:" steps run in the briefing frame, route "dispatch"
+// captures the Dispatch panel) and quits.
 if (process.env.LH_USER_DATA) app.setPath('userData', process.env.LH_USER_DATA);
 
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -73,7 +75,7 @@ function showWindow(route) {
 function createTray() {
   tray = new Tray(nativeImage.createFromPath(path.join(ROOT, 'resources', 'tray.png')));
   tray.setToolTip('Leader Harness');
-  tray.on('click', () => showWindow());
+  tray.on('click', () => showDispatch({ focus: true }));
   refreshTrayMenu();
 }
 
@@ -85,7 +87,8 @@ function refreshTrayMenu() {
   tray.setToolTip(`Leader Harness: ${pending} decision(s) waiting, ${running} running`);
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: 'Open Briefing Room', click: () => showWindow('#/briefings') },
+      { label: 'Open Dispatch', click: () => showDispatch({ focus: true }) },
+      { label: 'Open Leader Harness', click: () => showWindow('#/briefings') },
       { label: `Decisions waiting: ${pending}`, click: () => showWindow('#/decisions') },
       { type: 'separator' },
       {
@@ -98,11 +101,60 @@ function refreshTrayMenu() {
   );
 }
 
+// New briefings come to the Leader as the Dispatch panel (and/or a Windows
+// notification, per Settings). Failures always use a Windows notification.
 function notify({ title, body, route }) {
-  if (!store.get().settings.notifications || !Notification.isSupported()) return;
+  const { notifications, delivery = 'dispatch' } = store.get().settings;
+  if (!notifications) return;
+  const isBriefing = route?.startsWith('#/briefing/');
+  if (isBriefing && delivery !== 'windows') showDispatch({ focus: false });
+  if (isBriefing && delivery === 'dispatch') return;
+  if (!Notification.isSupported()) return;
   const n = new Notification({ title, body: body || '', icon: path.join(ROOT, 'resources', 'icon.png') });
-  n.on('click', () => showWindow(route));
+  n.on('click', () => (isBriefing ? showDispatch({ focus: true }) : showWindow(route)));
   n.show();
+}
+
+// ---------------------------------------------------------------- dispatch
+
+// The Dispatch panel: a small window in the corner of the screen where the
+// Leader reads new briefings and takes decisions without opening the harness.
+// It is created on demand and destroyed when closed, so it costs nothing idle.
+let dispatch = null;
+
+function showDispatch({ focus = true } = {}) {
+  if (dispatch && !dispatch.isDestroyed()) {
+    if (focus) dispatch.focus();
+    else dispatch.showInactive();
+    return;
+  }
+  const { workArea } = screen.getPrimaryDisplay();
+  const width = 420;
+  const height = Math.min(640, workArea.height - 32);
+  dispatch = new BrowserWindow({
+    width,
+    height,
+    x: workArea.x + workArea.width - width - 16,
+    y: workArea.y + workArea.height - height - 16,
+    frame: false,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    show: false,
+    backgroundColor: '#11151c',
+    title: 'Dispatch',
+    icon: path.join(ROOT, 'resources', 'icon.png'),
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  dispatch.loadFile(path.join(ROOT, 'src', 'renderer', 'dispatch.html'));
+  dispatch.once('ready-to-show', () => (focus ? dispatch.show() : dispatch.showInactive()));
+  dispatch.on('closed', () => (dispatch = null));
+}
+
+function closeDispatch() {
+  if (dispatch && !dispatch.isDestroyed()) dispatch.close();
 }
 
 // ---------------------------------------------------------------- styles
@@ -153,7 +205,8 @@ function pushState() {
   clearTimeout(pushTimer);
   pushTimer = setTimeout(() => {
     refreshTrayMenu();
-    if (win && !win.isDestroyed()) win.webContents.send('state', snapshot());
+    const state = snapshot();
+    for (const w of [win, dispatch]) if (w && !w.isDestroyed()) w.webContents.send('state', state);
   }, 60);
 }
 
@@ -264,6 +317,9 @@ function registerIpc() {
   });
   handle('open:path', (p) => shell.openPath(p));
   handle('project:inspect', (folder) => inspectProject(folder));
+  handle('dispatch:open', () => showDispatch({ focus: true }));
+  handle('dispatch:close', () => closeDispatch());
+  handle('window:open', (route) => showWindow(typeof route === 'string' && route.startsWith('#/') ? route : '#/briefings'));
 
   handle('official:spawn', (input) => {
     if (!input?.name?.trim() || !input?.title?.trim() || !input?.remit?.trim()) throw new Error('Name, title and remit are required.');
@@ -361,7 +417,7 @@ function registerIpc() {
   handle('job:cancel', (jobId) => scheduler.cancelJob(jobId));
   handle('settings:update', (patch) =>
     store.update((s) => {
-      for (const k of ['claudePath', 'maxConcurrent', 'defaultStyle', 'notifications', 'paused', 'jobTimeoutMin']) if (k in patch) s.settings[k] = patch[k];
+      for (const k of ['claudePath', 'maxConcurrent', 'defaultStyle', 'notifications', 'delivery', 'paused', 'jobTimeoutMin']) if (k in patch) s.settings[k] = patch[k];
       if (patch.clearRateLimit) s.settings.rateLimitedUntil = null;
       return s.settings;
     })
@@ -394,13 +450,27 @@ async function captureRoutes(dir) {
   for (const [i, route] of routes.entries()) {
     const bar = route.indexOf('|');
     const [hash, js] = bar < 0 ? [route, ''] : [route.slice(0, bar), route.slice(bar + 1)];
-    await win.webContents.executeJavaScript(`location.hash = ${JSON.stringify(hash)}`);
+    // "dispatch" captures the Dispatch panel instead of the main window.
+    let target = win;
+    if (hash === 'dispatch') {
+      const fresh = !dispatch || dispatch.isDestroyed();
+      showDispatch({ focus: true });
+      if (fresh) await new Promise((r) => dispatch.webContents.once('did-finish-load', r));
+      target = dispatch;
+    } else {
+      await win.webContents.executeJavaScript(`location.hash = ${JSON.stringify(hash)}`);
+    }
     await wait(900);
-    if (js) {
-      await win.webContents.executeJavaScript(js).catch((e) => console.error(e));
+    // "frame:<js>" runs inside the first embedded frame (the briefing), since
+    // the sandboxed briefing cannot be reached from the page itself.
+    for (const step of js ? js.split('||then||') : []) {
+      const inFrame = step.startsWith('frame:');
+      const code = inFrame ? step.slice(6) : step;
+      const runner = inFrame ? target.webContents.mainFrame.frames[0] : target.webContents;
+      await runner?.executeJavaScript(code).catch((e) => console.error(e));
       await wait(900);
     }
-    const img = await win.webContents.capturePage();
+    const img = await target.webContents.capturePage();
     fs.writeFileSync(path.join(dir, `${String(i).padStart(2, '0')}.png`), img.toPNG());
   }
   quitting = true;

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
+    <title>Dispatch</title>
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="dispatch.css" />
+  </head>
+  <body class="dispatch">
+    <header class="dp-head">
+      <span class="brand-mark">&#9733;</span>
+      <div class="dp-title"><b>Dispatch</b><span id="dp-count"></span></div>
+      <button class="dp-x" id="dp-close" title="Close (Esc)" aria-label="Close">&#10005;</button>
+    </header>
+    <main class="dp-body" id="dp-body"></main>
+    <footer class="dp-foot">
+      <button class="btn ghost sm" id="dp-open">Open Leader Harness</button>
+      <span class="spacer"></span>
+      <button class="btn ghost sm" id="dp-read-all" hidden>Mark all read</button>
+    </footer>
+    <div id="toasts"></div>
+    <script type="module" src="dispatch.js"></script>
+  </body>
+</html>

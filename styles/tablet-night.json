@@ -24,5 +24,5 @@
     "--font-body": "'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif",
     "--font-display": "Georgia, 'Times New Roman', serif"
   },
-  "css": ".chips span.rec, .decide { color: #16120a; }"
+  "css": ":root { --decide-on-accent: #16120a; }"
 }

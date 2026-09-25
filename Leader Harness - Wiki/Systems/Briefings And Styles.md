@@ -24,6 +24,13 @@
   - Daily Brief (Night): an example of a style built on another style's layout.
 - **Rendering**: a sandboxed iframe (`allow-scripts`, not same-origin) with a strict CSP. Custom CSS cannot reach the app or load remote resources. Decision buttons use `postMessage` to open the decision request.
 - **Style Studio** (`#/studio`): pick a style, then edit its variables (colour pickers), layout and CSS with a live preview. Saving a built-in style creates a copy. "Load the full layout CSS" gives complete control. Any style can be made the default. The style can also be switched per Briefing in the Briefing Room.
+- **Decisions inside the report** (2026-09-25, from "in the briefing room is hard to take a decision, make sure I can interact with the report and take decisions in the report no matter the style"):
+  - Every layout embeds the same controls (`decisionControls` and `DECISION_CSS` in `layouts/common.js`): options as buttons, pick then **Confirm decision**, **Give a different instruction** (a textarea, sent word for word), **Halt work** (click twice), and the response window.
+  - Each layout restyles them through `--decide-*` variables, so they look native in the deck, the dossier, the red box and the daily brief.
+  - The sandboxed frame sends `{lh:'choose', id, choice}` to the app. The app accepts it only from its own briefing frames and records it through `App.resolveDecision`, the same path the popup uses.
+  - After deciding, the report reopens at that decision (`ctx.focus`, `window.LH_FOCUS`) and shows the outcome.
+  - The deck's title slide links straight to pending decisions ("N decisions awaiting you: review now"). The red box opens by itself when a decision is waiting.
+  - `npm run check` fails if any format lacks the controls.
 - **Decision requests** (`src/renderer/decision.js`): new pending decisions open as a plain decision memo (title, from-line, situation, options with one marked Recommended). The Leader can also **Give a different instruction** (sent word for word), **Halt work** or **Decide later**. When the window expires, the recommendation proceeds automatically.
 - UPDATE (2026-09-25): the Hearts of Iron-style event popup, the rotated stamp and paperclip, the red box star emblem and the fake tablet chrome were removed as "toy like". See [[Systems/PATTERN - Voice And Tone]].
 

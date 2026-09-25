@@ -47,12 +47,20 @@ Every briefing has the same content: the bottom line, the situation, the actions
   </tr>
 </table>
 
+## Briefings come to you
+
+When an Official reports, the **Dispatch** panel appears quietly in the corner of your screen. It shows the bottom line of each new briefing and every decision waiting for you, so you can answer without opening the harness. Click the tray icon to bring it back at any time.
+
+<img src="docs/screenshots/dispatch.png" alt="The Dispatch panel with a decision about a billing cutover window, the recommended option selected and a Confirm button" width="360">
+
 ## Decisions that take seconds
 
-<img src="docs/screenshots/decision.png" alt="A decision request about a billing cutover window, with three options and a recommendation" width="900">
+Decide wherever you are reading: in Dispatch, or inside the briefing itself, in any format.
+
+<img src="docs/screenshots/decision-in-report.png" alt="A decision minute inside the Dossier format, with an option selected and a Confirm decision button" width="900">
 
 Each decision states the situation and gives you:
-- **A few concrete options**, one of them recommended by the Official.
+- **A few concrete options**, one of them recommended by the Official. Pick one, then confirm.
 - **Give a different instruction**, if none of the options fits. The Official receives your words exactly as written.
 - **Halt work**, to stop that Official until you resume them.
 - **A response window.** If there's no response in time, the recommendation proceeds.

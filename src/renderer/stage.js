@@ -5,7 +5,7 @@ import * as deck from './layouts/deck.js';
 import * as dossier from './layouts/dossier.js';
 import * as redbox from './layouts/redbox.js';
 import * as tablet from './layouts/tablet.js';
-import { BRIDGE_SCRIPT } from './layouts/common.js';
+import { BRIDGE_SCRIPT, DECISION_CSS } from './layouts/common.js';
 
 export const LAYOUTS = {
   deck: { name: 'Slide Deck', module: deck },
@@ -24,9 +24,12 @@ function varsCss(vars) {
 
 export function composeDocument(briefing, style, ctx) {
   const layout = (LAYOUTS[style.layout] || LAYOUTS.dossier).module;
-  const css = `${style.replaceLayoutCss ? '' : layout.css}\n${varsCss(style.vars)}\n${style.css || ''}`.replace(/<\/style/gi, '');
+  // Decision controls first, so layouts and styles can restyle them.
+  const css = `${DECISION_CSS}\n${style.replaceLayoutCss ? '' : layout.css}\n${varsCss(style.vars)}\n${style.css || ''}`.replace(/<\/style/gi, '');
   const html = layout.render(briefing, ctx);
-  const script = `${BRIDGE_SCRIPT}\n${layout.script || ''}`;
+  // LH_FOCUS names a decision to bring into view (e.g. the one just taken).
+  const focus = `window.LH_FOCUS = ${JSON.stringify(ctx.focus || null).replace(/</g, '\\u003c')};`;
+  const script = `${focus}\n${BRIDGE_SCRIPT}\n${layout.script || ''}\nif (window.LH_FOCUS) document.querySelector('[data-decision-block="' + window.LH_FOCUS + '"]')?.scrollIntoView({ block: 'center' });`;
   return `<!doctype html><html><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:">
 <style>${css}</style></head><body>${html}<script>${script}</script></body></html>`;

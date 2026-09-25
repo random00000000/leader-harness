@@ -1,7 +1,7 @@
 // Decision requests. New pending decisions open on their own as a short
 // decision memo; the Leader picks an option, sends a different instruction,
 // halts the Official's work, or decides later.
-import { $, esc, monogram, relTime, toast } from './util.js';
+import { $, esc, monogram, relTime } from './util.js';
 
 export class DecisionModal {
   constructor(app) {
@@ -56,20 +56,10 @@ export class DecisionModal {
   }
 
   async choose(choice) {
-    const d = this.app.state.decisions.find((x) => x.id === this.currentId);
-    if (!d) return this.close();
-    try {
-      const result = await this.app.call('decision:resolve', d.id, choice);
-      this.close();
-      if (d.sample) {
-        if (result?.route) this.app.go(result.route);
-        return;
-      }
-      const o = this.app.officialById(d.officialId);
-      toast(choice.halt ? `${o?.name || 'Official'}: work halted. Resume from Officials.` : `Instruction sent to ${o?.name || 'the Official'}.`);
-    } catch {
-      /* toast already shown */
-    }
+    if (!this.currentId) return;
+    const id = this.currentId;
+    this.close();
+    await this.app.resolveDecision(id, choice);
   }
 
   render() {
