@@ -13,7 +13,14 @@ Leader Harness is an AI harness shaped for leaders of organizations. The leader 
 Unattended sessions (routines and scheduled agents) work from `Leader Harness - Wiki/Systems/PLAN - Roadmap.md`. The rules:
 
 - Do one item per session: the first READY item. Never start an item marked HUMAN, and never make a decision the plan labels QUESTION. Log the blocker in the ledger instead.
-- Never create git remotes, push, publish, or change GitHub settings. Local commits are fine once the repository has a first commit made by the human; each commit covers one roadmap item.
+- Ship each item through a pull request. The repo is public: https://github.com/random00000000/leader-harness.
+  1. Branch from an up-to-date `main` as `auto/<item number>-<short-name>`.
+  2. Commit, then push the branch.
+  3. Run `gh pr create`. The PR body names the roadmap item and lists how it was verified.
+  4. Once `gh pr checks` passes (or, before CI exists, once your local checks pass), run `gh pr merge --squash --delete-branch`, then sync `main`.
+- Never push to `main` directly, never force-push, and never rewrite published history.
+- Never change repository settings, visibility, secrets or collaborators, and never publish releases.
+- Never commit anything secret: tokens, `.env` files, user data, or `state.json`.
 - Before finishing: `npm run check` (and `npm test` once it exists) must pass. For UI changes, screenshot the affected screens with `LH_USER_DATA=<temp dir> LH_CAPTURE=<scratch dir> LH_ROUTES=<routes> npx electron .` and look at the images. Never run the app against the real user data folder.
 - Real Claude Code sessions cost the human's usage. In tests use `model: haiku`, at most 2 real sessions per work session, and only when the item's verification step asks for it.
 - Never loosen authority enforcement (`toolsFor`, the deny lists, `--permission-mode dontAsk`) unless a roadmap item says so.
