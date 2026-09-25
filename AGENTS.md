@@ -12,7 +12,7 @@ Leader Harness is an AI harness shaped for leaders of organizations. The leader 
 
 Work on this repository only. The human's other projects, in sibling folders such as games and tools, are off limits until the human explicitly opens one to the harness:
 - Never read, search, test against, or modify files outside this repository, the system temp folder, or the app's dev data folders (`LH_USER_DATA`).
-- This applies even when a skill or template names another project as an example or "reference implementation" (the `llm-wiki` skill points at VictoryMarche). Use this repository's own wiki as the reference instead.
+- This applies even when a skill or template names another project as an example or "reference implementation". Use this repository's own wiki as the reference instead.
 - End-to-end tests use throwaway projects created in the temp folder. Never appoint an Official to a real project.
 
 ## Autonomous work
