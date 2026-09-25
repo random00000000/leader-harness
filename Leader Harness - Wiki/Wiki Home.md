@@ -5,13 +5,14 @@
 
 ## What this project is
 
-Leader Harness is an AI harness for leaders of organizations: people who have more tokens than time. Most harnesses need someone at the keyboard. This one works the other way. Senior Officials run scheduled specialist agents (Claude Code first, Codex possibly later) that do the work while the leader is away. The Senior Officials then report up through **Briefings** in a format the leader picks: Slide Deck, Dossier, Red Box or Daily Brief. The leader answers short decision requests. The voice is serious and executive (see [[Systems/PATTERN - Voice And Tone]]), and the app is built to stay light on the machine. It is a local desktop app. Each project it manages keeps its own wiki in this same pattern. Version 0.1 of the desktop app exists: `npm install`, then `npm start`.
+Leader Harness is an AI harness for leaders of organizations: people who have more tokens than time. Most harnesses need someone at the keyboard. This one works the other way. Senior Officials run scheduled specialist agents (Claude Code first, Codex possibly later) that do the work while the leader is away. The Senior Officials then report up through **Briefings** in a format the leader picks: Slide Deck, Dossier, Red Box or Daily Brief. The leader answers short decision requests. The voice is serious and executive (see [[Systems/PATTERN - Voice And Tone]]), and the app is built to stay light on the machine. It is a local desktop app. Each project it manages keeps its own wiki in this same pattern. Version 0.2 of the desktop app exists; the Leader runs it from the `Leader Harness.lnk` shortcut built by `npm run release`.
 
 ## Always-current pages
 
 - [[PROMPT-LEDGER]] — every human request with a one-line result. Read this first to get familiar with intent.
 - [[Systems/PLAN - Leader Harness|PLAN - Leader Harness]] — the product vision, the decisions made, and the questions still open.
 - [[Systems/PLAN - Roadmap|PLAN - Roadmap]] — the ordered work queue for automation: READY items with acceptance criteria and verification steps, and HUMAN items that wait for the Leader.
+- [[Systems/PLAN - Reliability|PLAN - Reliability]] — how the harness is kept from breaking itself: the layers of protection, versioning, releases and rollback.
 - [[Systems/Desktop App|Desktop App]] — the Electron app: structure, how to run it, and dev hooks.
 - [[Systems/Senior Officials|Senior Officials]] — appointing Officials, cadences, authority enforcement, surges.
 - [[Systems/Briefings And Styles|Briefings And Styles]] — the Briefing schema, the four formats, the Style Studio and decision requests.

@@ -34,7 +34,9 @@ function lookupClaude(configured) {
 
 // ---- workspace guard ----------------------------------------------------
 
-const GUARD_SCRIPT = path.join(__dirname, 'guard.js');
+// In a packaged build the guard is unpacked next to the asar archive, because
+// an external node process cannot read inside app.asar.
+const GUARD_SCRIPT = path.join(__dirname, 'guard.js').replace(`app.asar${path.sep}`, `app.asar.unpacked${path.sep}`);
 let guardNode; // cached: { node } or { error }
 
 // The guard hook runs under Node.js. Inside Electron, process.execPath is the

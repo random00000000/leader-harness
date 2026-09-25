@@ -33,6 +33,13 @@ Unattended sessions (routines and scheduled agents) work from `Leader Harness - 
 - Never loosen authority enforcement (`toolsFor`, the deny lists, `--permission-mode dontAsk`) unless a roadmap item says so.
 - Update the roadmap item's status, the relevant Systems page, and the ledger in the same session. For scheduled runs, the ledger Request cell names the trigger (e.g. "Scheduled roadmap session: item 3").
 
+## Releases and reliability
+
+- The Leader runs a packaged release (`Leader Harness.lnk`), never the working tree. See `Leader Harness - Wiki/Systems/PLAN - Reliability.md`.
+- Bump `version` in package.json in your pull request (semver: patch for fixes, minor for a roadmap item) and add one line to `CHANGELOG.md`.
+- Protected files (`src/main/guard.js`, `runner.js`, `authority.js`, `workspace.js`, `scripts/release.js`, `.github/`, `AGENTS.md`, `CLAUDE.md`) are merged by the Leader only. If your pull request touches one, open it and raise the merge as a decision in your briefing.
+- Only the Leader runs `npm run release` (or asks for it).
+
 ## Persistent Project Wiki (Wiki Brain)
 
 Development must compound across sessions. The wiki is the brain; agent sessions are temporary compute. The wiki lives in `Leader Harness - Wiki/` as plain Obsidian-compatible Markdown with [[wikilinks]] — the human opens that folder as their Obsidian vault.

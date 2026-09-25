@@ -30,7 +30,8 @@
   - File tools (Read, Edit, MultiEdit, Write, NotebookEdit, Glob, Grep): any path outside the workspace.
   - Bash/PowerShell: absolute paths outside it (`C:\...` and Git Bash `/c/...` forms), `..` escapes, and home references (`~`, `$HOME`, `%USERPROFILE%`).
   - Observe/Build: git `push`, `merge` and `rebase` however they are spelled (`git -C x push`, `git.exe push`), `reset --hard`, and `gh pr merge`.
-  - Every level: force pushes.
+  - Every level: force pushes; pushes to `main`/`master` (explicit refspecs, `HEAD:main`, `--all`, `--mirror`, or a bare push while on main); and `gh pr merge` for a pull request that changes protected files (`guard.js`, `runner.js`, `authority.js`, `workspace.js`, `scripts/release.js`, `.github/`, `AGENTS.md`, `CLAUDE.md`). The Official must raise such a merge as a decision instead. If the PR's files cannot be listed, the merge is blocked.
+  - The authority rules moved from `prompts.js` to `src/main/authority.js` so they can be protected without protecting every prompt change.
   - The guard **fails closed**: bad input, a missing root, or any internal error blocks. The runner self-tests the guard (one allowed and one blocked call) before any session, and refuses to start sessions if Node.js is missing or the self-test fails.
   - Verified 2026-09-25 with a real haiku session: the inside read passed; `../outside.txt` via Read and via `cat`, and `git push` under Build, were all blocked.
 - **Surge** (called "big push" before 2026-09-25): an objective plus N runs (1–50), executed back to back. Each run continues from the wiki. Three failures mark it stalled.
@@ -42,6 +43,8 @@
 - A new Official's first Briefing is requested immediately, so the Leader sees it working.
 
 ## Tried and rejected
+
+- **Ship authority that allowed any push** (2026-09-25): in the item 5 acceptance run, a Harness Engineer with no way to open a pull request pushed straight to `main` on the (fake) remote. Pushes to main/master are now blocked at every authority.
 
 - **Allowing the system temp folder in the guard** (2026-09-25): a real session read a neighbouring file through `cat ../outside.txt` because the workspace sat inside temp. Temp holds other programs' files, so only the workspace itself is allowed now.
 
