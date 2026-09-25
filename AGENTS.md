@@ -27,7 +27,7 @@ Unattended sessions (routines and scheduled agents) work from `Leader Harness - 
   4. Once `gh pr checks --watch` is green, run `gh pr merge --squash --delete-branch`, then sync `main`. Never merge a red or pending PR.
 - Never push to `main` directly, never force-push, and never rewrite published history.
 - Never change repository settings, visibility, secrets or collaborators, and never publish releases.
-- Never commit anything secret: tokens, `.env` files, user data, or `state.json`.
+- Never commit anything secret: tokens, `.env` files, user data, or `state.json`. Screenshots committed to this public repo must come from demo data (seeded, paused state), never from the Leader's real Officials, threads or projects.
 - Before finishing: `npm run check` must pass (it also runs `npm test`). New behaviour comes with tests in `test/`, and tests never spawn Claude Code. For UI changes, screenshot the affected screens with `LH_USER_DATA=<temp dir> LH_CAPTURE=<scratch dir> LH_ROUTES=<routes> npx electron .` and look at the images. Never run the app against the real user data folder.
 - Real Claude Code sessions cost the human's usage. In tests use `model: haiku`, at most 2 real sessions per work session, and only when the item's verification step asks for it.
 - Never loosen authority enforcement (`toolsFor`, the deny lists, `--permission-mode dontAsk`) unless a roadmap item says so.
