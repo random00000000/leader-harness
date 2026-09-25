@@ -16,6 +16,7 @@
   - Observe: read, git read commands and web. Edit/Write only inside its wiki.
   - Build: full tools, but `git push`, `merge`, `rebase` and `reset --hard` are denied.
   - Ship: full tools, force-push denied.
+- **Scope**: every session's persona says to stay inside the working directory and ignore other projects named by skills or templates (added 2026-09-25, after the `llm-wiki` skill was found to point agents at the human's game VictoryMarche). This is prompt-only for now; hard enforcement is [[Systems/PLAN - Roadmap]] item 3, the workspace guard hook.
 - **Surge** (called "big push" before 2026-09-25): an objective plus N runs (1–50), executed back to back. Each run continues from the wiki. Three failures mark it stalled.
 - **Halt** from a popup or the Official's page stops queued work until the Leader resumes it.
 

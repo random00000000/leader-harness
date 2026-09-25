@@ -8,6 +8,13 @@ Leader Harness is an AI harness shaped for leaders of organizations. The leader 
 
 **Current phase: building v0.1.** The app is Electron with plain ES modules and no build step: `npm install`, `npm start`, and `npm run check` (run it before finishing any change). Main process code is in `src/main/`, the renderer in `src/renderer/`, and Briefing styles in `styles/`. Source files use LF line endings. Record designs not yet built as `PLAN - <Name>.md` pages in the wiki's `Systems/` folder.
 
+## Scope
+
+Work on this repository only. The human's other projects, in sibling folders such as games and tools, are off limits until the human explicitly opens one to the harness:
+- Never read, search, test against, or modify files outside this repository, the system temp folder, or the app's dev data folders (`LH_USER_DATA`).
+- This applies even when a skill or template names another project as an example or "reference implementation" (the `llm-wiki` skill points at VictoryMarche). Use this repository's own wiki as the reference instead.
+- End-to-end tests use throwaway projects created in the temp folder. Never appoint an Official to a real project.
+
 ## Autonomous work
 
 Unattended sessions (routines and scheduled agents) work from `Leader Harness - Wiki/Systems/PLAN - Roadmap.md`. The rules:
