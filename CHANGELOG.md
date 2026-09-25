@@ -2,6 +2,10 @@
 
 One line per merged pull request, newest first. Versions follow semver; releases are built with `npm run release`.
 
+## 0.5.1
+
+- Suggested Officials move to the Officials screen; Review and appoint opens the form pre-filled.
+
 ## 0.5.0
 
 - Suggested Officials: the Appoint screen offers three Officials drawn from your recent Claude Code and Codex threads.

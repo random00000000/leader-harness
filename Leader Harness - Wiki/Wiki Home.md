@@ -16,7 +16,7 @@ Leader Harness is an AI harness for leaders of organizations: people who have mo
 - [[Systems/Desktop App|Desktop App]] — the Electron app: structure, how to run it, and dev hooks.
 - [[Systems/Senior Officials|Senior Officials]] — appointing Officials, cadences, authority enforcement, surges.
 - [[Systems/Briefings And Styles|Briefings And Styles]] — the Briefing schema, the four formats, the Style Studio and decision requests.
-- [[Systems/Suggested Officials|Suggested Officials]] — three Officials suggested on the Appoint screen from the Leader's recent Claude Code and Codex threads.
+- [[Systems/Suggested Officials|Suggested Officials]] — three Officials suggested on the Officials screen from the Leader's recent Claude Code and Codex threads.
 - [[Systems/Dispatch|Dispatch]] — the corner panel that brings new briefings and decisions to the Leader without opening the harness.
 - [[Systems/PATTERN - Voice And Tone|PATTERN - Voice And Tone]] — the binding vocabulary and visual restraint for everything the Leader sees.
 

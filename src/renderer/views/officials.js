@@ -1,5 +1,6 @@
 // Officials: every Senior Official at a glance, with quick actions.
-import { $$, esc, monogram, relTime, cadenceLabel, toast } from '../util.js';
+import { $, $$, esc, monogram, relTime, cadenceLabel, toast } from '../util.js';
+import { renderSuggestions, wantsFreshSuggestions } from './suggestions.js';
 
 export function officialStatus(app, o) {
   const running = app.state.jobs.find((j) => j.officialId === o.id && j.status === 'running');
@@ -33,6 +34,7 @@ export function mount(root, app) {
         <div class="page-head"><div><div class="eyebrow">Senior staff</div><h1>Officials</h1>
           <p>Each Official owns an area, works in the background with Claude Code, and reports to you in briefings.</p></div>
           <div class="actions"><button class="btn primary" data-go="#/appoint">Appoint an Official</button></div></div>
+        <section class="suggestions" data-suggestions></section>
         <div class="officials">
           ${s.officials
             .map((o) => {
@@ -65,7 +67,12 @@ export function mount(root, app) {
     $$('[data-brief]', root).forEach((el) => (el.onclick = () => app.call('official:run', el.dataset.brief, 'briefing').then(() => toast('Briefing requested.'))));
     $$('[data-work]', root).forEach((el) => (el.onclick = () => app.call('official:run', el.dataset.work, 'work').then(() => toast('Work session started.'))));
     $$('[data-push]', root).forEach((el) => (el.onclick = () => launchPush(app, app.officialById(el.dataset.push))));
+    renderSuggestions($('[data-suggestions]', root), app, (suggestion) => {
+      app.ui.pendingSuggestion = suggestion;
+      app.go('#/appoint');
+    });
   }
   render();
+  if (wantsFreshSuggestions(app)) app.call('suggest:run');
   return { update: render, tick: render };
 }
