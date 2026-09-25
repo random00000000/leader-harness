@@ -33,6 +33,19 @@ const PRESETS = [
   },
 ];
 
+// Offered only when the project folder is Leader Harness itself: the Official
+// that develops the harness by working its roadmap.
+export const HARNESS_PRESET = {
+  label: 'Harness Engineer',
+  title: 'Head of Engineering, Leader Harness',
+  remit:
+    'Develop Leader Harness by working the roadmap in "Leader Harness - Wiki/Systems/PLAN - Roadmap.md", following AGENTS.md exactly. One roadmap item per work session, shipped through a pull request. Report progress, blockers and anything that needs my decision.',
+  authority: 'ship',
+  isolate: true,
+  briefingCadence: { mode: 'daily', time: '08:00' },
+  workCadence: { mode: 'interval', minutes: 240 },
+};
+
 const INTERVALS = [
   [30, 'Every 30 minutes'],
   [60, 'Every hour'],
@@ -89,7 +102,7 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
         <div class="console-head"><i></i><i></i><i></i><span style="margin-left:8px">${creating ? 'leader-harness › appoint-official' : `leader-harness › ${esc(v.name)} › instructions`}</span></div>
         <div class="console-body">
           ${creating ? `<div class="step"><div class="step-title"><b>$</b>start from a template</div>
-            <div class="presets">${PRESETS.map((p, i) => `<button type="button" class="btn sm" data-preset="${i}">${esc(p.label)}</button>`).join('')}</div></div>` : ''}
+            <div class="presets">${PRESETS.map((p, i) => `<button type="button" class="btn sm" data-preset="${i}">${esc(p.label)}</button>`).join('')}<button type="button" class="btn sm primary" data-harness hidden title="Develops Leader Harness itself by working its roadmap">${esc(HARNESS_PRESET.label)}</button></div></div>` : ''}
           <div class="step"><div class="step-title"><b>01</b>who are they</div>
             <div class="grid-2">
               <label class="field"><span>Name</span><input type="text" name="name" value="${esc(v.name)}" placeholder="e.g. Sarah Chen" required></label>
@@ -198,26 +211,47 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
     if (e.target.name === 'authority') $$('.auth-opt', form).forEach((l) => l.classList.toggle('on', $('input', l).checked));
     preview();
   });
-  $$('[data-preset]', form).forEach(
-    (btn) =>
-      (btn.onclick = () => {
-        const p = PRESETS[Number(btn.dataset.preset)];
-        form.elements.title.value = p.title;
-        form.elements.remit.value = p.remit;
-        form.querySelector(`[name=authority][value=${p.authority}]`).checked = true;
-        const wc = $('[data-cadence="workCadence"]', form);
-        $('[data-mode]', wc).value = p.workCadence.mode;
-        if (p.workCadence.minutes) $('[data-minutes]', wc).value = p.workCadence.minutes;
-        $('[data-mode]', wc).dispatchEvent(new Event('change', { bubbles: true }));
-        $$('.auth-opt', form).forEach((l) => l.classList.toggle('on', $('input', l).checked));
-        if (!form.elements.name.value) form.elements.name.focus();
-        preview();
-      })
-  );
+  function setCadence(name, c) {
+    const el = $(`[data-cadence="${name}"]`, form);
+    $('[data-mode]', el).value = c.mode;
+    if (c.minutes) $('[data-minutes]', el).value = c.minutes;
+    if (c.time) $('[data-time]', el).value = c.time;
+    $('[data-mode]', el).dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function applyPreset(p) {
+    form.elements.title.value = p.title;
+    form.elements.remit.value = p.remit;
+    form.querySelector(`[name=authority][value=${p.authority}]`).checked = true;
+    setCadence('workCadence', p.workCadence);
+    if (p.briefingCadence) setCadence('briefingCadence', p.briefingCadence);
+    if (p.isolate !== undefined && form.elements.isolate) form.elements.isolate.checked = p.isolate;
+    $$('.auth-opt', form).forEach((l) => l.classList.toggle('on', $('input', l).checked));
+    if (!form.elements.name.value) form.elements.name.focus();
+    preview();
+  }
+
+  $$('[data-preset]', form).forEach((btn) => (btn.onclick = () => applyPreset(PRESETS[Number(btn.dataset.preset)])));
+  $('[data-harness]', form)?.addEventListener('click', () => applyPreset(HARNESS_PRESET));
+
+  // The Harness Engineer template is offered only for this repository.
+  let inspectTimer = null;
+  async function inspectFolder() {
+    const folder = form.elements.projectPath?.value.trim();
+    const info = folder ? await app.call('project:inspect', folder).catch(() => null) : null;
+    const btn = $('[data-harness]', form);
+    if (btn) btn.hidden = !info?.harness;
+    if (form.elements.isolate) form.elements.isolate.disabled = !info?.git;
+  }
+  form.elements.projectPath?.addEventListener('input', () => {
+    clearTimeout(inspectTimer);
+    inspectTimer = setTimeout(inspectFolder, 300);
+  });
   $('[data-pick]', form)?.addEventListener('click', async () => {
     const folder = await app.call('dialog:folder');
     if (folder) {
       form.elements.projectPath.value = folder;
+      await inspectFolder();
       preview();
     }
   });

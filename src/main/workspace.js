@@ -72,4 +72,15 @@ function removeWorkspace({ projectPath, dest }) {
   if (projectPath) tryGit(projectPath, ['worktree', 'prune']);
 }
 
-module.exports = { gitRoot, baseRef, createWorkspace, syncWorkspace, removeWorkspace };
+// What the setup screen needs to know about a chosen folder: whether it is a
+// git project, and whether it is Leader Harness itself.
+function inspectProject(folder) {
+  const exists = Boolean(folder) && fs.existsSync(folder);
+  const root = exists ? gitRoot(folder) : null;
+  const top = root ? path.resolve(root) : folder;
+  const harness =
+    exists && fs.existsSync(path.join(top, 'Leader Harness - Wiki', 'Wiki Home.md')) && fs.existsSync(path.join(top, 'AGENTS.md'));
+  return { exists, git: Boolean(root), harness };
+}
+
+module.exports = { gitRoot, baseRef, createWorkspace, syncWorkspace, removeWorkspace, inspectProject };
