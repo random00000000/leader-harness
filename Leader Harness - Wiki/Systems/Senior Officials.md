@@ -16,7 +16,14 @@
   - Observe: read, git read commands and web. Edit/Write only inside its wiki.
   - Build: full tools, but `git push`, `merge`, `rebase` and `reset --hard` are denied.
   - Ship: full tools, force-push denied.
-- **Scope**: every session's persona says to stay inside the working directory and ignore other projects named by skills or templates (added 2026-09-25, after the `llm-wiki` skill was found to point agents at the human's game VictoryMarche). This is prompt-only for now; hard enforcement is [[Systems/PLAN - Roadmap]] item 3, the workspace guard hook.
+- **Scope**: every session's persona says to stay inside the working directory and ignore other projects named by skills or templates (added 2026-09-25, after the `llm-wiki` skill was found to point agents at the human's game VictoryMarche). The workspace guard below enforces it.
+- **Workspace guard** (`src/main/guard.js`, roadmap item 3): every session runs with `--settings` holding a PreToolUse hook, `"<node>" guard.js`. `LH_GUARD_ROOT` (the working directory) and `LH_GUARD_AUTHORITY` are set in the session's environment. It blocks with exit code 2 and a reason:
+  - File tools (Read, Edit, MultiEdit, Write, NotebookEdit, Glob, Grep): any path outside the workspace.
+  - Bash/PowerShell: absolute paths outside it (`C:\...` and Git Bash `/c/...` forms), `..` escapes, and home references (`~`, `$HOME`, `%USERPROFILE%`).
+  - Observe/Build: git `push`, `merge` and `rebase` however they are spelled (`git -C x push`, `git.exe push`), `reset --hard`, and `gh pr merge`.
+  - Every level: force pushes.
+  - The guard **fails closed**: bad input, a missing root, or any internal error blocks. The runner self-tests the guard (one allowed and one blocked call) before any session, and refuses to start sessions if Node.js is missing or the self-test fails.
+  - Verified 2026-09-25 with a real haiku session: the inside read passed; `../outside.txt` via Read and via `cat`, and `git push` under Build, were all blocked.
 - **Surge** (called "big push" before 2026-09-25): an objective plus N runs (1–50), executed back to back. Each run continues from the wiki. Three failures mark it stalled.
 - **Halt** from a popup or the Official's page stops queued work until the Leader resumes it.
 
@@ -27,10 +34,12 @@
 
 ## Tried and rejected
 
+- **Allowing the system temp folder in the guard** (2026-09-25): a real session read a neighbouring file through `cat ../outside.txt` because the workspace sat inside temp. Temp holds other programs' files, so only the workspace itself is allowed now.
+
 - **Prompt-only authority** (OBSERVATION, 2026-09-24): an Observe Official on Haiku was told to set up a build and wrote `package.json`, `index.html` and `server.js` into the project despite "only edit your wiki". That led to the permission enforcement above. Verified afterwards: the same order produced 2 permission denials and only wiki changes.
 - **Silently dropping a project path that doesn't exist**: the Official ended up with no project and briefed that it had "no project context". Spawning now fails with "Project folder not found".
 
 ## Open edges
 
-- The Build and Ship deny lists match command prefixes. A determined session could use another form, such as `git -C . push`. Revisit with hooks or a git wrapper if Officials push where they shouldn't.
+- The guard reads command text, so an indirect route (a script file that pushes, or a path assembled at run time) could still get past it. Revisit with a git credential or wrapper boundary if an Official ever does this.
 - There is no per-Official usage budget yet. Pacing is global (Sessions at once).

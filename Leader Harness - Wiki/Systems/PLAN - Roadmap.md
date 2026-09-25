@@ -24,18 +24,8 @@ Goal (the human, 2026-09-25): "Ideally the harness gets to a state that can deve
 ### 2. Continuous integration: DONE (2026-09-25)
 `.github/workflows/check.yml` runs `npm run check` on every pull request and push to main. See [[Systems/Desktop App]], CI.
 
-### 3. Workspace guard hook: READY
-Why: an Official must never touch anything outside its own workspace. Today only the prompt says so, apart from Observe's scoped Edit/Write; prompt-only rules have already failed once (see [[Systems/Senior Officials]], Tried and rejected). This item also closes the git-deny gap (`git -C . push` got past the prefix rules).
-- Every run passes `--settings` with a PreToolUse hook: `node resources/hooks/guard.js`. It reads the tool call from stdin and exits with code 2 and a reason to block.
-- The guard's rules:
-  - Read, Edit, Write, NotebookEdit, Glob and Grep: every path must resolve inside the working directory (the wiki is always inside it).
-  - Bash: block commands that reference an absolute path outside the working directory, `cd` out of it, or use `~` / `%USERPROFILE%` / `$HOME` paths.
-  - Build: block any git `push`, `merge`, `rebase` or `reset --hard`, however it is written.
-  - Ship: block force pushes.
-- The allowed root is passed to the hook through an environment variable set by `runner.js`.
-
-Acceptance: unit tests for the guard against a list of cases. Allowed: paths inside the root, relative paths. Blocked: `C:\Users\...\OtherProject\x`, `..\..\other`, `cd /d C:\`, `git -C x push`, `git   push`, `git.exe push`, `git push --force`.
-Verify: `npm test`, then one real haiku session told to read a file in the parent folder must show a denial (use a temp folder, never a real project).
+### 3. Workspace guard hook: DONE (2026-09-25)
+`src/main/guard.js` runs as a PreToolUse hook on every session and fails closed. See [[Systems/Senior Officials]], Workspace guard.
 
 ### 4. Isolated workspace per Official: READY
 Why: an Official developing *this* app must not edit the copy the Leader is running. More generally, Officials should work on their own checkout and deliver through pull requests, never on the Leader's working tree.
