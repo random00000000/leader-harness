@@ -20,6 +20,7 @@ It builds on the decisions in [[Systems/PLAN - Leader Harness]]: a local desktop
 - **Renderer** (`src/renderer/`): views for the Briefing Room, Decisions, Officials, Appoint (setup console), Official, Activity, Style Studio and Settings. `decision.js` is the decision request modal.
 - **Closing the window destroys it**; the main process, scheduler and tray keep running, and the tray or a second launch recreates the window. The tray menu has Pause all work and Quit.
 - **Dev hooks**: `LH_USER_DATA=<dir>` isolates state. `LH_CAPTURE=<dir>` together with `LH_ROUTES` (one route per line, `route|js` runs js first) screenshots each route and quits without starting the scheduler. In normal mode the scheduler runs, so demo states must set `settings.paused: true`. This is how the UI was verified.
+- **Tests**: `npm test` runs `node --test` over `test/*.test.js` with no extra dependencies, and `npm run check` runs the tests after the syntax and style checks. The tests cover cadences (including midnight), queue deduplication, decision expiry and resolution (auto, free text, halt), authority tool rules, the persona scope rule, wiki scaffolding and usage-limit detection. Fixtures live in fresh temp folders (`test/helpers.js`), and every test store has work paused, so the scheduler can never start a real Claude Code session in a test. Verified by breaking `isDue` on purpose: 2 tests failed.
 - The **Electron postinstall** is run explicitly by our own `postinstall` script, because npm 11 skipped Electron's download step (FACT, observed 2026-09-24).
 
 ## Performance

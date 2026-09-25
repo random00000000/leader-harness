@@ -11,30 +11,15 @@ This is the work queue for unattended sessions. Its rules live in AGENTS.md unde
 - Take the **first item whose status is READY**. Do exactly one item per session.
 - Change its status to IN PROGRESS when you start, then DONE (with the date), or BLOCKED (with the reason) when you stop.
 - An item marked **HUMAN** must never be started by automation. Raise it in the ledger's AI Notes instead.
-- Each item is finished only when its acceptance criteria are met *and* its verification steps pass. When built, move the durable content into the relevant Systems page, then delete it here.
+- Each item is finished only when its acceptance criteria are met *and* its verification steps pass. When built, move the durable content into the relevant Systems page, then collapse the item here to a one-line DONE stub (numbers stay stable because other pages refer to them).
 - Add newly discovered work to the bottom as READY or HUMAN. Never reorder items above the one you are working on.
 
 ## Queue
 
 Goal (the human, 2026-09-25): "Ideally the harness gets to a state that can develop features for the harness." Items 1–5 build toward that goal; item 6 is the moment the harness starts working on itself. Until then, and afterwards unless the human says otherwise, the harness and its automation touch **only this repository** (see "Scope" in AGENTS.md).
 
-### 1. Test suite: READY
-Why: automation needs a safety net before changing the scheduler or permissions.
-- Add `npm test`, using `node --test` (no new dependencies) under `test/`.
-- Cover:
-  - `isDue` / `nextDue` for daily, interval and manual cadences, including across midnight.
-  - `Scheduler.enqueue` deduplication.
-  - `expireDecisions`: taking the recommended option creates a directive job.
-  - `resolve` with `{halt:true}`: the official is halted and no job is created.
-  - `toolsFor`: Observe is scoped to a relative wiki path, and throws when the wiki is outside cwd. Build/Ship deny lists are present.
-  - `ensureWiki`: creates `<Name> - Wiki` with `Wiki Home.md` and `PROMPT-LEDGER.md`, and reuses an existing wiki.
-  - `detectRateLimit`: parses the epoch form and falls back to +30 min.
-  - `persona`: contains the workspace scope rule.
-- The scheduler must run without Electron. Construct it with a fake store and fake `notify`, and never spawn `claude`.
-- Test fixtures live in temp folders created by the tests, never in other projects on the machine.
-
-Acceptance: `npm test` passes, and `npm run check` also runs the tests.
-Verify: break `isDue` on purpose and confirm the tests fail, then revert.
+### 1. Test suite: DONE (2026-09-25)
+`npm test` (node:test, 23 tests in `test/`); `npm run check` runs it too. See [[Systems/Desktop App]], Tests.
 
 ### 2. Continuous integration: READY
 Why: the repo is public and automation merges its own pull requests, so every PR needs an automatic gate.

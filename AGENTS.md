@@ -28,7 +28,7 @@ Unattended sessions (routines and scheduled agents) work from `Leader Harness - 
 - Never push to `main` directly, never force-push, and never rewrite published history.
 - Never change repository settings, visibility, secrets or collaborators, and never publish releases.
 - Never commit anything secret: tokens, `.env` files, user data, or `state.json`.
-- Before finishing: `npm run check` (and `npm test` once it exists) must pass. For UI changes, screenshot the affected screens with `LH_USER_DATA=<temp dir> LH_CAPTURE=<scratch dir> LH_ROUTES=<routes> npx electron .` and look at the images. Never run the app against the real user data folder.
+- Before finishing: `npm run check` must pass (it also runs `npm test`). New behaviour comes with tests in `test/`, and tests never spawn Claude Code. For UI changes, screenshot the affected screens with `LH_USER_DATA=<temp dir> LH_CAPTURE=<scratch dir> LH_ROUTES=<routes> npx electron .` and look at the images. Never run the app against the real user data folder.
 - Real Claude Code sessions cost the human's usage. In tests use `model: haiku`, at most 2 real sessions per work session, and only when the item's verification step asks for it.
 - Never loosen authority enforcement (`toolsFor`, the deny lists, `--permission-mode dontAsk`) unless a roadmap item says so.
 - Update the roadmap item's status, the relevant Systems page, and the ledger in the same session. For scheduled runs, the ledger Request cell names the trigger (e.g. "Scheduled roadmap session: item 3").
