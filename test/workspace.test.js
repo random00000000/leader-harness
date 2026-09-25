@@ -102,3 +102,14 @@ test('removing a workspace keeps the branch', () => {
 test('createWorkspace refuses folders that are not repositories', () => {
   assert.throws(() => createWorkspace({ projectPath: tempDir(), dest: path.join(tempDir(), 'ws'), branch: 'official/x' }), /not a git repository/);
 });
+
+test('inspectProject recognises git projects and Leader Harness itself', () => {
+  const { inspectProject } = require('../src/main/workspace');
+  const { project } = makeProject();
+  assert.deepEqual(inspectProject(project), { exists: true, git: true, harness: false });
+  assert.deepEqual(inspectProject(tempDir()), { exists: true, git: false, harness: false });
+  assert.equal(inspectProject(path.join(tempDir(), 'missing')).exists, false);
+  // This very repository is the harness.
+  assert.equal(inspectProject(path.join(__dirname, '..')).harness, true);
+  assert.equal(inspectProject(path.join(__dirname, '..', 'src')).harness, true, 'a subfolder resolves to the repo root');
+});

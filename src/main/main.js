@@ -6,7 +6,7 @@ const path = require('path');
 const { Store, id } = require('./store');
 const { Scheduler, nextDue } = require('./scheduler');
 const { ensureWiki, installMandate, displayName } = require('./wiki');
-const { gitRoot, createWorkspace, removeWorkspace } = require('./workspace');
+const { gitRoot, createWorkspace, removeWorkspace, inspectProject } = require('./workspace');
 const { findClaude } = require('./runner');
 const { AUTHORITY } = require('./prompts');
 const { welcomeBriefing } = require('./welcome');
@@ -263,6 +263,7 @@ function registerIpc() {
     return r.canceled ? null : r.filePaths[0];
   });
   handle('open:path', (p) => shell.openPath(p));
+  handle('project:inspect', (folder) => inspectProject(folder));
 
   handle('official:spawn', (input) => {
     if (!input?.name?.trim() || !input?.title?.trim() || !input?.remit?.trim()) throw new Error('Name, title and remit are required.');

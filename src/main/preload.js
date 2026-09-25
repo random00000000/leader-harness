@@ -8,6 +8,7 @@ const CHANNELS = new Set([
   'styles:delete',
   'dialog:folder',
   'open:path',
+  'project:inspect',
   'official:spawn',
   'official:update',
   'official:setStatus',

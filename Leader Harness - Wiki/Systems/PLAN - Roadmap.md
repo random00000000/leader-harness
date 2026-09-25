@@ -30,17 +30,8 @@ Goal (the human, 2026-09-25): "Ideally the harness gets to a state that can deve
 ### 4. Isolated workspace per Official: DONE (2026-09-25)
 `src/main/workspace.js`: each git-project Official works in its own worktree on `official/<name>`. See [[Systems/Senior Officials]], Isolated workspace.
 
-### 5. Self-development template: READY
-Why: make appointing the harness's own engineer a one-click, correctly-configured act.
-- Add a template to the setup console: **Harness Engineer**.
-  - Title: "Head of Engineering, Leader Harness".
-  - Remit: "Develop Leader Harness by working the roadmap in `Leader Harness - Wiki/Systems/PLAN - Roadmap.md`, following AGENTS.md exactly. One roadmap item per work session, shipped through a pull request. Report progress, blockers and anything that needs my decision."
-  - Settings: Ship authority, isolated copy on, daily briefing at 08:00, background work every 4 hours.
-- It is shown only when the chosen project folder contains this repository (it has `Leader Harness - Wiki/`).
-- Work sessions already follow the project's AGENTS.md, because Claude Code loads `CLAUDE.md` in the working directory. Confirm that it does, and that the briefing prompt reports roadmap progress and open pull requests.
-
-Acceptance: an end-to-end haiku run against a **local clone of this repo whose `origin` is a local bare repository**, never GitHub. The Official picks the first READY item, works it on a branch, and "pushes" to the bare remote. It then produces a briefing that names the item and its status.
-Verify: inspect the bare remote's branches and the briefing. Delete the temp clone and remote afterwards.
+### 5. Self-development template: DONE (2026-09-25)
+The setup console offers **Harness Engineer** when the project folder is this repository. See [[Systems/Senior Officials]], Harness Engineer.
 
 ### 6. The harness develops itself: HUMAN
 The human appoints the Harness Engineer (item 5) from the running app, on this repository, and chooses its cadence. From then on, new roadmap items are delivered by the harness's own Official, and the human reads its briefings. Automation must not appoint it.
