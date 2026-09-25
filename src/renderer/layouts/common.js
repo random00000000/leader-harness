@@ -16,10 +16,10 @@ export function fromLine(ctx) {
 
 // Decision state as shown inside a briefing.
 export function decisionState(d) {
-  if (d.status === 'pending') return { open: true, label: 'Awaiting your decision' };
+  if (d.status === 'pending') return { open: true, label: 'Awaiting decision' };
   const opt = d.options.find((o) => o.id === d.choice?.optionId);
   const text = d.choice?.text || opt?.label || '';
-  const how = { decided: 'Decided', auto: 'Auto-decided (recommended)', halted: 'Halted', withdrawn: 'Withdrawn' }[d.status] || d.status;
+  const how = { decided: 'Decided', auto: 'Recommendation proceeded', halted: 'Work halted', withdrawn: 'Withdrawn' }[d.status] || d.status;
   return { open: false, label: text ? `${how}: ${text}` : how };
 }
 

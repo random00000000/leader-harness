@@ -52,12 +52,12 @@ Verify: `npm test`.
 ### 4. Per-Official usage budget: READY
 Why: D4 says subscription usage is the main resource, and one Official can currently use it all.
 - Add official fields `maxSessionsPerDay` (default 12) and `maxTokensPerDay` (default 0, meaning no limit), editable in the orders form.
-- Counters reset at local midnight. Big push runs count toward them.
-- When over budget, the scheduler skips that Official's scheduled and big push jobs; they stay queued. Leader orders (directive jobs) always run.
-- Show "Budget: n/12 today" on the Cabinet card and Official page.
+- Counters reset at local midnight. Surge runs count toward them.
+- When over budget, the scheduler skips that Official's scheduled and surge jobs; they stay queued. Leader instructions (directive jobs) always run.
+- Show "Budget: n/12 today" on the Officials card and Official page.
 
 Acceptance: unit tests for the skip rule and the midnight reset.
-Verify: `npm test`, then an `LH_CAPTURE` screenshot of the Cabinet (see Verification recipes).
+Verify: `npm test`, then an `LH_CAPTURE` screenshot of the Officials screen (see Dev hooks in [[Systems/Desktop App]]).
 
 ### 5. Launch at login: READY
 Why: Officials only work while the app runs.

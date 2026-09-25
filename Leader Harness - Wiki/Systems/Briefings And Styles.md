@@ -17,14 +17,15 @@
   - A *layout* (`src/renderer/layouts/`: deck, dossier, redbox, tablet) turns the schema into HTML plus its structural CSS.
   - A *style* (`styles/*.json` built in, or `userData/styles/*.json` custom) picks a layout and supplies CSS variables and extra CSS. With `replaceLayoutCss`, it replaces the layout's CSS entirely.
 - **Built-in styles**:
-  - Cabinet Deck: 16:9 slides with arrow keys and dots.
-  - Manila Dossier: a typed sheet with a stamp and paperclip, and decision minutes with checkboxes.
+  - Slide Deck: 16:9 slides with arrow keys and dots.
+  - Dossier: a typed memorandum in a file folder, with classification banners at the top and bottom, and decision minutes with checkboxes.
   - Red Box: a leather box that opens onto civil-service submissions (Issue / Recommendation / Background / Handling) and decision slips.
-  - Daily Brief Tablet: a device frame with feed cards.
-  - Night Tablet: an example of a style built on another style's layout.
-- **Rendering**: a sandboxed iframe (`allow-scripts`, not same-origin) with a strict CSP. Custom CSS cannot reach the app or load remote resources. Decision buttons use `postMessage` to open the event popup.
+  - Daily Brief: a tablet frame with feed cards (no fake status or tab bars).
+  - Daily Brief (Night): an example of a style built on another style's layout.
+- **Rendering**: a sandboxed iframe (`allow-scripts`, not same-origin) with a strict CSP. Custom CSS cannot reach the app or load remote resources. Decision buttons use `postMessage` to open the decision request.
 - **Style Studio** (`#/studio`): pick a style, then edit its variables (colour pickers), layout and CSS with a live preview. Saving a built-in style creates a copy. "Load the full layout CSS" gives complete control. Any style can be made the default. The style can also be switched per Briefing in the Briefing Room.
-- **Decisions / events**: new pending decisions pop up as HOI4-style events. Each has options, **Other…** (a free-text order, sent word for word), **Halt work** and **Later**. When the window expires, the recommended option is carried out automatically.
+- **Decision requests** (`src/renderer/decision.js`): new pending decisions open as a plain decision memo (title, from-line, situation, options with one marked Recommended). The Leader can also **Give a different instruction** (sent word for word), **Halt work** or **Decide later**. When the window expires, the recommendation proceeds automatically.
+- UPDATE (2026-09-25): the Hearts of Iron-style event popup, the rotated stamp and paperclip, the red box star emblem and the fake tablet chrome were removed as "toy like". See [[Systems/PATTERN - Voice And Tone]].
 
 ## Decisions
 

@@ -19,6 +19,9 @@ if (process.env.LH_USER_DATA) app.setPath('userData', process.env.LH_USER_DATA);
 
 if (!app.requestSingleInstanceLock()) app.quit();
 app.setAppUserModelId('Leader Harness');
+// The UI is simple enough for software rendering; this removes the GPU
+// process (~90 MB). LH_GPU=1 turns acceleration back on.
+if (!process.env.LH_GPU) app.disableHardwareAcceleration();
 
 let win = null;
 let tray = null;
@@ -28,7 +31,9 @@ let scheduler;
 
 // ---------------------------------------------------------------- window
 
-function createWindow() {
+// Closing the window destroys it (freeing the renderer); the scheduler and
+// tray live on in the main process. Opening again recreates it.
+function createWindow(route) {
   win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -47,15 +52,9 @@ function createWindow() {
       sandbox: true,
     },
   });
-  win.loadFile(path.join(ROOT, 'src', 'renderer', 'index.html'));
+  win.loadFile(path.join(ROOT, 'src', 'renderer', 'index.html'), route ? { hash: route.replace(/^#/, '') } : undefined);
   win.once('ready-to-show', () => win.show());
-  win.on('close', (e) => {
-    // Closing hides to the tray so officials keep working.
-    if (!quitting) {
-      e.preventDefault();
-      win.hide();
-    }
-  });
+  win.on('closed', () => (win = null));
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:/.test(url)) shell.openExternal(url);
     return { action: 'deny' };
@@ -63,7 +62,7 @@ function createWindow() {
 }
 
 function showWindow(route) {
-  if (!win) return;
+  if (!win) return createWindow(route);
   if (win.isMinimized()) win.restore();
   win.show();
   win.focus();
@@ -198,7 +197,7 @@ function spawnOfficial(input) {
   };
   store.update((s) => {
     s.officials.push(official);
-    // The welcome event ("The Cabinet Is Empty") is answered by appointing someone.
+    // The welcome decision ("No Officials appointed") is answered by appointing one.
     for (const d of s.decisions) if (d.sample && d.status === 'pending') Object.assign(d, { status: 'decided', resolvedAt: official.createdAt });
   });
   // A new official briefs straight away so the Leader sees it working.
@@ -249,7 +248,7 @@ function registerIpc() {
   });
 
   handle('dialog:folder', async () => {
-    const r = await dialog.showOpenDialog(win, { properties: ['openDirectory'], title: 'Choose the project this official will manage' });
+    const r = await dialog.showOpenDialog(win, { properties: ['openDirectory'], title: 'Choose the project this Official will manage' });
     return r.canceled ? null : r.filePaths[0];
   });
   handle('open:path', (p) => shell.openPath(p));
@@ -293,7 +292,7 @@ function registerIpc() {
   });
 
   handle('operation:launch', ({ officialId, objective, runs }) => {
-    if (!objective?.trim()) throw new Error('A big push needs an objective.');
+    if (!objective?.trim()) throw new Error('A surge needs an objective.');
     const op = {
       id: id('op'),
       officialId,

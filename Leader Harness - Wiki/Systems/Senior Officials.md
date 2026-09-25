@@ -8,15 +8,15 @@
 
 ## How it works
 
-- An **Official** has a name, title, remit, optional project folder, authority, model, preferred style, a Briefing cadence, a work cadence and a decision window. It is appointed from the setup console (`#/spawn`), which has four templates: Game minister, Chief of Staff, Director of Research and Quartermaster.
+- An **Official** has a name, title, remit, optional project folder, authority, model, preferred style, a Briefing cadence, a work cadence and a decision window. It is appointed from the setup console (`#/appoint`), which has four templates: Project Lead, Chief of Staff, Director of Research and Head of Engineering.
 - **Wiki**: each Official gets a Karpathy-style wiki. If there is a project, it lives in the project root as `<Project> - Wiki/`, or reuses one that already exists. If there is no project, it lives in the Official's home folder in userData. An optional checkbox appends the wiki mandate to the project's AGENTS.md. The Official's ledger rows use the Model "Claude Code (Leader Harness: <name>)".
 - **Cadence**: `daily at HH:MM`, `interval N minutes` (at least 5) or `manual`. It is checked every 20 seconds. Each kind of job has at most one queued per Official, and one Official never runs two sessions at once.
-- **Session kinds**: briefing (structured output against the Briefing schema), work (picks the most valuable item from its wiki), directive (the Leader's order), and operation (one run of a big push).
+- **Session kinds**: briefing (structured output against the Briefing schema), work (picks the most valuable item from its wiki), directive (the Leader's instruction), and operation (one run of a surge).
 - **Authority is enforced by Claude Code permissions, not just the prompt** (`toolsFor` in `src/main/prompts.js`, with `--permission-mode dontAsk`):
   - Observe: read, git read commands and web. Edit/Write only inside its wiki.
   - Build: full tools, but `git push`, `merge`, `rebase` and `reset --hard` are denied.
   - Ship: full tools, force-push denied.
-- **Big push**: an objective plus N runs (1–50), executed back to back. Each run continues from the wiki. Three failures mark it stalled.
+- **Surge** (called "big push" before 2026-09-25): an objective plus N runs (1–50), executed back to back. Each run continues from the wiki. Three failures mark it stalled.
 - **Halt** from a popup or the Official's page stops queued work until the Leader resumes it.
 
 ## Decisions

@@ -37,7 +37,7 @@ export function compact(n) {
 }
 
 export function cadenceLabel(c) {
-  if (!c || c.mode === 'manual') return 'On order only';
+  if (!c || c.mode === 'manual') return 'Only on request';
   if (c.mode === 'daily') return `Daily at ${c.time}`;
   const m = Number(c.minutes);
   if (m % 1440 === 0) return m === 1440 ? 'Every day' : `Every ${m / 1440} days`;
@@ -51,38 +51,19 @@ function hash(str) {
   return h >>> 0;
 }
 
-const HERALD = [
-  ['#7a1f1f', '#e2c071'],
-  ['#1f3d7a', '#e8ecf2'],
-  ['#1f5a3a', '#e2c071'],
-  ['#4a2a6b', '#e2c071'],
-  ['#2b2f36', '#d6b25e'],
-  ['#6b3a1f', '#f1e2c0'],
-];
+// Muted tones that tell Officials apart without decoration.
+const TONES = ['#3b5b8c', '#4f6f5a', '#7a5a3a', '#5b4f7a', '#3f6f78', '#6b4a4a'];
 
-// A heraldic shield with initials: the official's portrait.
-export function emblem(name, size = 44) {
-  const h = hash(name);
-  const [field, charge] = HERALD[h % HERALD.length];
+// The Official's initials on a flat tile.
+export function monogram(name, size = 40) {
   const initials = String(name)
     .split(/\s+/)
-    .filter(Boolean)
+    .filter((w) => /^[A-Za-z]/.test(w))
     .slice(0, 2)
     .map((w) => w[0].toUpperCase())
-    .join('');
-  const pattern = h % 3;
-  const deco =
-    pattern === 0
-      ? `<path d="M6 6 L94 94" stroke="${charge}" stroke-opacity=".18" stroke-width="18"/>`
-      : pattern === 1
-        ? `<rect x="6" y="6" width="88" height="34" fill="${charge}" fill-opacity=".14"/>`
-        : `<path d="M50 6 V110" stroke="${charge}" stroke-opacity=".16" stroke-width="22"/>`;
-  return `<svg class="emblem" width="${size}" height="${size * 1.12}" viewBox="0 0 100 112" aria-hidden="true">
-    <defs><clipPath id="sh${h}"><path d="M6 6 H94 V56 C94 84 72 100 50 108 C28 100 6 84 6 56 Z"/></clipPath></defs>
-    <g clip-path="url(#sh${h})"><rect width="100" height="112" fill="${field}"/>${deco}</g>
-    <path d="M6 6 H94 V56 C94 84 72 100 50 108 C28 100 6 84 6 56 Z" fill="none" stroke="${charge}" stroke-width="4"/>
-    <text x="50" y="66" text-anchor="middle" font-family="Bahnschrift, 'Segoe UI', sans-serif" font-weight="700" font-size="${initials.length > 1 ? 34 : 42}" fill="${charge}">${esc(initials)}</text>
-  </svg>`;
+    .join('') || '?';
+  const bg = TONES[hash(name) % TONES.length];
+  return `<span class="monogram" style="width:${size}px;height:${size}px;background:${bg};font-size:${Math.round(size * 0.38)}px" aria-hidden="true">${esc(initials)}</span>`;
 }
 
 export function toast(message, kind = 'info') {

@@ -1,4 +1,4 @@
-// Cabinet Deck: a 16:9 slide presentation. Arrow keys, click, or dots to move.
+// Slide Deck: a 16:9 slide presentation. Arrow keys, click, or dots to move.
 import { esc, fmtDate, STATUS, LEVEL, fromLine, decisionState, decideButton } from './common.js';
 
 function chunk(list, n) {
@@ -51,7 +51,7 @@ export function render(b, ctx) {
       <div class="options">${d.options
         .map((o) => `<div class="option ${o.recommended ? 'rec' : ''}"><strong>${esc(o.label)}</strong><span>${esc(o.detail)}</span>${o.recommended ? '<em>Recommended</em>' : ''}</div>`)
         .join('')}</div>
-      <div class="decide-row">${decideButton(d, 'Open decision')}</div>
+      <div class="decide-row">${decideButton(d, 'Review decision')}</div>
     </section>`);
   }
   if ((b.next || []).length) {

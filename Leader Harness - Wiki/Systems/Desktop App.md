@@ -17,10 +17,26 @@ It builds on the decisions in [[Systems/PLAN - Leader Harness]]: a local desktop
   - `prompts.js`: persona, prompts, authority, Briefing schema.
   - `wiki.js`: scaffolds each Official's wiki.
   - `welcome.js`: the first-run Briefing.
-- **Renderer** (`src/renderer/`): views for the Briefing Room, Decisions, Cabinet, Appoint (setup console), Official, Activity, Style Studio and Settings. `event.js` is the HOI4-style popup.
-- **Closing the window hides it to the tray**, so the scheduler keeps running. The tray menu has Pause all work and Quit.
-- **Dev hooks**: `LH_USER_DATA=<dir>` isolates state. `LH_CAPTURE=<dir>` together with `LH_ROUTES` (one route per line, `route|js` runs js first) screenshots each route and quits. This is how the UI was verified.
+- **Renderer** (`src/renderer/`): views for the Briefing Room, Decisions, Officials, Appoint (setup console), Official, Activity, Style Studio and Settings. `decision.js` is the decision request modal.
+- **Closing the window destroys it**; the main process, scheduler and tray keep running, and the tray or a second launch recreates the window. The tray menu has Pause all work and Quit.
+- **Dev hooks**: `LH_USER_DATA=<dir>` isolates state. `LH_CAPTURE=<dir>` together with `LH_ROUTES` (one route per line, `route|js` runs js first) screenshots each route and quits without starting the scheduler. In normal mode the scheduler runs, so demo states must set `settings.paused: true`. This is how the UI was verified.
 - The **Electron postinstall** is run explicitly by our own `postinstall` script, because npm 11 skipped Electron's download step (FACT, observed 2026-09-24).
+
+## Performance
+
+Intent: "we need to make it run super light weight because currently it feels like it sows my computer" (2026-09-25).
+
+- FACT (measured 2026-09-25, Windows, demo state, all work paused):
+
+  | State | Before | After |
+  |---|---|---|
+  | Window open | 5 processes, ~398 MB | 5 processes, ~365 MB, ~2% of one core idle |
+  | Window closed | ~398 MB (window hidden, not freed) | 3 processes, ~176 MB, 0 CPU |
+
+- OBSERVATION: the real load is the Claude Code sessions. One Official session measured ~354 MB with sustained CPU. So sessions run at **below-normal OS priority** (`os.setPriority` in `runner.js`; child processes inherit it), and the default is one session at a time.
+- DECISION: GPU acceleration is disabled (`app.disableHardwareAcceleration()`); the UI is simple enough for software rendering. `LH_GPU=1` re-enables it. Revisit if scrolling large briefings stutters.
+- DECISION: no infinite CSS animations and no backdrop blur. The renderer's 30-second refresh skips when the document is hidden. The Claude Code path lookup is cached (`findClaude`) instead of running on every state push.
+- Rule for contributors: measure before and after any change that could add weight (see Dev hooks), and keep idle CPU at zero when the window is closed.
 
 ## Decisions
 
@@ -29,6 +45,8 @@ It builds on the decisions in [[Systems/PLAN - Leader Harness]]: a local desktop
 - Source files use LF line endings, enforced by `.gitattributes`. Python on Windows had silently written CRLF into files it edited, which broke later exact-match edits.
 
 ## Tried and rejected
+
+- Measuring performance with the dev data dir in normal mode while the demo state had an active surge: the scheduler started a real Claude Code session. Demo states must set `settings.paused: true`.
 
 - Passing the Official's wiki with `--add-dir` while scoping permissions by absolute path. On Windows, Claude Code did not match the `//C:/...` absolute rule form, so even the allowed file was denied. Relative rules (`Edit(<Project> - Wiki/**)`) work.
 

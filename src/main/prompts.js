@@ -80,7 +80,7 @@ const BRIEFING_SCHEMA = {
         required: ['title', 'body', 'options'],
         properties: {
           title: { type: 'string' },
-          body: { type: 'string', description: 'The situation in 2-4 sentences, written like a Hearts of Iron event.' },
+          body: { type: 'string', description: 'The situation in 2-4 sentences, written as a concise decision memo.' },
           options: {
             type: 'array',
             minItems: 2,
@@ -111,7 +111,7 @@ function persona(official) {
     'The Leader has very little time and more usage budget than attention. You work in the background, unattended, and report through briefings. Nobody is watching this session: never ask questions, never wait for input.',
     `Authority (${auth.label}): ${auth.rule}`,
     `Your memory is the wiki at "${official.wikiDir}". Before working, read its "Wiki Home.md" and the latest rows of "PROMPT-LEDGER.md", plus only the Systems pages the task touches.`,
-    `Every session must prepend one row to PROMPT-LEDGER.md (newest at the top of the table) with Model "Claude Code (Leader Harness: ${official.name})". When the session carries the Leader's own words (an order or a big push objective), the Request cell holds those words verbatim, with line breaks as <br> and | escaped; otherwise it names the trigger, e.g. "Scheduled briefing" or "Scheduled work session". Keep results to one line. Never write in the Human Notes column.`,
+    `Every session must prepend one row to PROMPT-LEDGER.md (newest at the top of the table) with Model "Claude Code (Leader Harness: ${official.name})". When the session carries the Leader's own words (an instruction or a surge objective), the Request cell holds those words verbatim, with line breaks as <br> and | escaped; otherwise it names the trigger, e.g. "Scheduled briefing" or "Scheduled work session". Keep results to one line. Never write in the Human Notes column.`,
     'When you build or change a system, create or update its page under Systems/ in the same session. Page names are Title Case with spaces, e.g. "Combat System.md" or "PLAN - Fog Of War.md"; never kebab-case, snake_case or dates. Label knowledge FACT / OBSERVATION / HYPOTHESIS / DECISION / QUESTION.',
   ].join('\n\n');
 }
@@ -130,7 +130,7 @@ function briefingPrompt(official, { since, activity }) {
       ? `The project is at "${official.projectPath}" (your working directory). Look before you write: list its top-level files, read its README and any docs or roadmap, run "git log --oneline -20" and "git status". Never ask the Leader for anything you can find in the project yourself.`
       : 'You have no project folder; work from your wiki and your remit.',
     `Work sessions since the last briefing:\n${formatActivity(activity)}`,
-    'Write for a busy leader: the bottom line first, facts over narration, no filler.',
+    'Write for an executive with minutes to spare, in the register of an intelligence briefing: the bottom line first, facts over narration, no filler, no dramatisation.',
     'Raise a decision only when the Leader genuinely needs to choose (direction, spend, anything above your authority). Each decision has 2-4 options that are concrete orders you would carry out, and exactly one is marked recommended. If the Leader does not answer in time, the recommended option is taken automatically, so recommend what you would defend.',
     'Before returning, record this briefing as a row in your PROMPT-LEDGER.md.',
     'Return the briefing as structured output.',
@@ -147,17 +147,17 @@ function workPrompt(official) {
 
 function directivePrompt(official, directive) {
   return [
-    'The Leader has issued an order. Carry it out within your authority.',
+    'The Leader has sent an instruction. Carry it out within your authority.',
     `Decision: ${directive.decisionTitle}`,
-    `Leader's order (verbatim): ${directive.text}`,
-    'If the order needs more authority than you have, do everything you can up to that line and explain what remains.',
+    `Leader's instruction (verbatim): ${directive.text}`,
+    'If the instruction needs more authority than you have, do everything you can up to that line and explain what remains.',
     'Finish with a summary of at most five lines.',
   ].join('\n\n');
 }
 
 function operationPrompt(official, op, runNumber) {
   return [
-    `BIG PUSH, run ${runNumber} of ${op.runs}. The Leader has committed a large share of usage to one objective.`,
+    `SURGE, run ${runNumber} of ${op.runs}. The Leader has concentrated a large share of usage on one objective.`,
     `Objective (verbatim from the Leader): ${op.objective}`,
     'Read the wiki to see what earlier runs of this push achieved, then take the next concrete step toward the objective. Record progress in the wiki so the next run can continue without repeating work.',
     'Finish with a summary of at most five lines.',

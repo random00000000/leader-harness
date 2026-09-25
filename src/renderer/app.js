@@ -1,10 +1,10 @@
-// Renderer entry: state, routing, the sidebar, and the event (decision) modal.
+// Renderer entry: state, routing, the sidebar, and the decision modal.
 import { $, $$, esc, toast } from './util.js';
-import { EventModal } from './event.js';
+import { DecisionModal } from './decision.js';
 import * as briefings from './views/briefings.js';
 import * as decisions from './views/decisions.js';
-import * as cabinet from './views/cabinet.js';
-import * as spawn from './views/spawn.js';
+import * as officials from './views/officials.js';
+import * as appoint from './views/appoint.js';
 import * as official from './views/official.js';
 import * as activity from './views/activity.js';
 import * as studio from './views/studio.js';
@@ -13,7 +13,7 @@ import * as settings from './views/settings.js';
 const ICONS = {
   briefings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h11l5 5v9a1 1 0 0 1-1 1H4z"/><path d="M15 5v5h5M8 13h8M8 16.5h5"/></svg>',
   decisions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/></svg>',
-  cabinet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h14v7c0 5-3.5 8-7 9-3.5-1-7-4-7-9z"/><path d="m9 11 2 2 4-4"/></svg>',
+  officials: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h14v7c0 5-3.5 8-7 9-3.5-1-7-4-7-9z"/><path d="m9 11 2 2 4-4"/></svg>',
   activity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>',
   studio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.6 0-1-.8-1.4-.8-2.4 0-1 .8-1.5 1.8-1.5H17a4 4 0 0 0 4-4c0-4.7-4-8.5-9-8.5Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg>',
   settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>',
@@ -22,9 +22,9 @@ const ICONS = {
 const ROUTES = [
   { re: /^#\/briefings?(?:\/([\w]+))?$/, view: briefings, nav: 'briefings' },
   { re: /^#\/decisions$/, view: decisions, nav: 'decisions' },
-  { re: /^#\/cabinet$/, view: cabinet, nav: 'cabinet' },
-  { re: /^#\/spawn$/, view: spawn, nav: 'cabinet' },
-  { re: /^#\/official\/([\w]+)$/, view: official, nav: 'cabinet' },
+  { re: /^#\/officials$/, view: officials, nav: 'officials' },
+  { re: /^#\/appoint$/, view: appoint, nav: 'officials' },
+  { re: /^#\/official\/([\w]+)$/, view: official, nav: 'officials' },
   { re: /^#\/activity$/, view: activity, nav: 'activity' },
   { re: /^#\/studio$/, view: studio, nav: 'studio' },
   { re: /^#\/settings$/, view: settings, nav: 'settings' },
@@ -35,7 +35,7 @@ class App {
     this.state = null;
     this.styles = [];
     this.current = null; // { view, params, instance }
-    this.modal = new EventModal(this);
+    this.modal = new DecisionModal(this);
     this.ui = {}; // per-session UI memory (selected style, filters...)
   }
 
@@ -77,6 +77,7 @@ class App {
     this.route();
     this.modal.checkForNew();
     setInterval(() => {
+      if (document.hidden) return;
       this.renderChrome();
       this.current?.instance?.tick?.();
     }, 30000);
@@ -116,8 +117,8 @@ class App {
     $('#sidebar').innerHTML = `
       ${item('briefings', 'Briefing Room', unread ? `<span class="badge">${unread}</span>` : '')}
       ${item('decisions', 'Decisions', pending ? `<span class="badge">${pending}</span>` : '')}
-      ${item('cabinet', 'Cabinet', s.officials.length ? `<span class="badge quiet">${s.officials.length}</span>` : '')}
-      ${item('activity', 'Activity', running ? '<span class="dot ok pulse" style="margin-left:auto"></span>' : '')}
+      ${item('officials', 'Officials', s.officials.length ? `<span class="badge quiet">${s.officials.length}</span>` : '')}
+      ${item('activity', 'Activity', running ? '<span class="dot ok" style="margin-left:auto"></span>' : '')}
       <div class="nav-sep"></div>
       ${item('studio', 'Style Studio')}
       ${item('settings', 'Settings')}

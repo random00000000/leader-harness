@@ -1,12 +1,12 @@
-// One Senior Official: status, big pushes, recent sessions, and their orders.
-import { $, $$, esc, emblem, relTime, duration, compact, toast } from '../util.js';
-import { officialForm } from './spawn.js';
-import { officialStatus, launchPush } from './cabinet.js';
+// One Senior Official: status, surges, recent sessions, and their instructions.
+import { $, $$, esc, monogram, relTime, duration, compact, toast } from '../util.js';
+import { officialForm } from './appoint.js';
+import { officialStatus, launchPush } from './officials.js';
 
 export function mount(root, app, [officialId]) {
   const o = () => app.officialById(officialId);
   if (!o()) {
-    root.innerHTML = '<div class="page"><div class="empty">This official has left the cabinet.</div></div>';
+    root.innerHTML = '<div class="page"><div class="empty">This Official has been removed.</div></div>';
     return {};
   }
 
@@ -23,19 +23,19 @@ export function mount(root, app, [officialId]) {
     const off = o();
     if (!off) return;
     $('[data-head]', root).innerHTML = `
-      ${emblem(off.name, 58)}
+      ${monogram(off.name, 58)}
       <div><div class="eyebrow">Senior Official</div><h1>${esc(off.name)}</h1><p>${esc(off.title)} · ${officialStatus(app, off)}</p></div>
       <div class="actions">
         <button class="btn" data-brief>Brief me now</button>
-        <button class="btn" data-work>Work now</button>
-        <button class="btn" data-push>Big push</button>
+        <button class="btn" data-work>Start work</button>
+        <button class="btn" data-push>Surge</button>
         ${off.status === 'halted' ? '<button class="btn primary" data-resume>Resume work</button>' : '<button class="btn danger" data-halt>Halt</button>'}
       </div>`;
-    $('[data-brief]', root).onclick = () => app.call('official:run', off.id, 'briefing').then(() => toast('Briefing ordered.'));
-    $('[data-work]', root).onclick = () => app.call('official:run', off.id, 'work').then(() => toast('Work session ordered.'));
+    $('[data-brief]', root).onclick = () => app.call('official:run', off.id, 'briefing').then(() => toast('Briefing requested.'));
+    $('[data-work]', root).onclick = () => app.call('official:run', off.id, 'work').then(() => toast('Work session started.'));
     $('[data-push]', root).onclick = () => launchPush(app, off);
-    $('[data-halt]', root)?.addEventListener('click', () => app.call('official:setStatus', off.id, 'halted').then(() => toast(`${off.name} halted.`)));
-    $('[data-resume]', root)?.addEventListener('click', () => app.call('official:setStatus', off.id, 'active').then(() => toast(`${off.name} is back on duty.`)));
+    $('[data-halt]', root)?.addEventListener('click', () => app.call('official:setStatus', off.id, 'halted').then(() => toast(`${off.name}: work halted.`)));
+    $('[data-resume]', root)?.addEventListener('click', () => app.call('official:setStatus', off.id, 'active').then(() => toast(`${off.name}: work resumed.`)));
   }
 
   function renderSide() {
@@ -52,14 +52,14 @@ export function mount(root, app, [officialId]) {
         <div class="muted" style="font-size:12.5px">Next briefing ${off.nextBriefingAt ? esc(relTime(off.nextBriefingAt)) : 'on order only'} · next work ${off.nextWorkAt ? esc(relTime(off.nextWorkAt)) : 'on order only'}</div>
       </div>
       <div class="card section">
-        <h2>Big pushes</h2>
+        <h2>Surges</h2>
         <div class="ops">${ops
           .map(
             (op) => `<div class="op"><div class="row"><b style="flex:1">${esc(op.objective)}</b><span class="pill ${op.status === 'active' ? 'gold' : op.status === 'complete' ? 'ok' : 'bad'}">${esc(op.status)}</span></div>
               <div class="meter"><span style="width:${(op.completed / op.runs) * 100}%"></span></div>
               <div class="row muted" style="font-size:12px"><span>${op.completed} of ${op.runs} runs</span>${op.status === 'active' ? `<button class="btn ghost sm" style="margin-left:auto" data-cancel-op="${op.id}">Cancel</button>` : ''}</div></div>`
           )
-          .join('') || '<div class="muted" style="font-size:13px">No big pushes yet. Use one when you want a lot of usage spent on one objective.</div>'}</div>
+          .join('') || '<div class="muted" style="font-size:13px">No surges yet. Start one to concentrate usage on a single objective.</div>'}</div>
       </div>
       <div class="card section">
         <h2>Recent sessions</h2>
@@ -75,19 +75,19 @@ export function mount(root, app, [officialId]) {
           .join('') : '<div class="muted" style="font-size:13px">Nothing has run yet.</div>'}
       </div>
       <div class="card section">
-        <h2>Dismiss</h2>
-        <div class="muted" style="font-size:13px">Removes the official from the cabinet. Their wiki stays on disk.</div>
-        <div><button class="btn danger sm" data-dismiss>Dismiss ${esc(off.name)}</button></div>
+        <h2>Remove</h2>
+        <div class="muted" style="font-size:13px">Stops all scheduled work. The Official's wiki is kept on disk.</div>
+        <div><button class="btn danger sm" data-dismiss>Remove ${esc(off.name)}</button></div>
       </div>`;
     $('[data-wiki]', root).onclick = () => app.call('open:path', off.wikiDir);
     $('[data-project]', root)?.addEventListener('click', () => app.call('open:path', off.projectPath));
     $$('[data-cancel-op]', root).forEach((b) => (b.onclick = () => app.call('operation:cancel', b.dataset.cancelOp)));
     $('[data-dismiss]', root).onclick = async () => {
-      const ok = await app.dialog({ title: `Dismiss ${off.name}?`, text: 'Scheduled work stops and pending decisions are withdrawn. The wiki is kept.', confirm: 'Dismiss', danger: true });
+      const ok = await app.dialog({ title: `Remove ${off.name}?`, text: 'Scheduled work stops and pending decisions are withdrawn. The wiki is kept.', confirm: 'Remove', danger: true });
       if (ok) {
         await app.call('official:dismiss', off.id);
-        toast(`${off.name} dismissed.`);
-        app.go('#/cabinet');
+        toast(`${off.name} removed.`);
+        app.go('#/officials');
       }
     };
   }
@@ -96,7 +96,7 @@ export function mount(root, app, [officialId]) {
     mode: 'edit',
     onSubmit: async (patch) => {
       await app.call('official:update', officialId, patch);
-      toast('Orders updated.');
+      toast('Instructions updated.');
     },
   });
   renderHead();
@@ -104,7 +104,7 @@ export function mount(root, app, [officialId]) {
 
   return {
     update() {
-      if (!o()) return app.go('#/cabinet');
+      if (!o()) return app.go('#/officials');
       renderHead();
       renderSide();
     },

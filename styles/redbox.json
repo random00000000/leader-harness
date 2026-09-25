@@ -2,7 +2,7 @@
   "id": "redbox",
   "order": 3,
   "name": "Red Box",
-  "description": "A leather despatch box holding civil service submissions.",
+  "description": "Civil service submissions in a despatch box: issue, recommendation, background.",
   "layout": "redbox",
   "vars": {
     "--backdrop": "radial-gradient(ellipse at 50% 0%, #2b2320, #121010 70%)",

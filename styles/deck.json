@@ -1,8 +1,8 @@
 {
   "id": "deck",
   "order": 1,
-  "name": "Cabinet Deck",
-  "description": "A slide presentation, one idea per slide. Arrow keys to move.",
+  "name": "Slide Deck",
+  "description": "One point per slide, for reading at a glance. Arrow keys to move.",
   "layout": "deck",
   "vars": {
     "--backdrop": "#0e1117",

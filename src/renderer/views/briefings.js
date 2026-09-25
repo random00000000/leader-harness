@@ -1,12 +1,12 @@
 // Briefing Room: the inbox of briefings on the left, the selected briefing
 // rendered in the chosen style on the right.
-import { $, $$, esc, emblem, shortTime } from '../util.js';
+import { $, $$, esc, monogram, shortTime } from '../util.js';
 import { mountStage } from '../stage.js';
 
 export function briefingContext(app, b) {
   const o = app.officialById(b.officialId);
   return {
-    from: o ? { name: o.name, title: o.title } : b.from || { name: 'Former official', title: 'Dismissed' },
+    from: o ? { name: o.name, title: o.title } : b.from || { name: 'Former Official', title: 'Removed' },
     decisions: (b.decisions || []).map((dId) => app.state.decisions.find((d) => d.id === dId)).filter(Boolean),
   };
 }
@@ -34,7 +34,7 @@ export function mount(root, app, [briefingId]) {
         .map((b) => {
           const ctx = briefingContext(app, b);
           return `<div class="inbox-item ${b.read ? '' : 'unread'} ${sel?.id === b.id ? 'on' : ''}" data-id="${b.id}">
-            ${emblem(ctx.from.name, 30)}
+            ${monogram(ctx.from.name, 30)}
             <div class="top"><span class="cls ${esc(b.classification)}">${esc(b.classification)}</span><span>${esc(ctx.from.name)}</span><span class="time">${esc(shortTime(b.createdAt))}</span></div>
             <div class="t">${esc(b.title)}</div>
             <div class="s">${esc(b.bluf)}</div>
@@ -58,9 +58,9 @@ export function mount(root, app, [briefingId]) {
     if (!b) {
       viewer.innerHTML = `<div class="page"><div class="empty">
         <p style="font-size:16px;color:var(--text)">No briefings yet.</p>
-        <p>Appoint a Senior Official and their first briefing will arrive here within minutes.</p>
-        <button class="btn primary" data-go="#/spawn">Appoint an official</button></div></div>`;
-      $('[data-go]', viewer).onclick = () => app.go('#/spawn');
+        <p>Appoint an Official. Their first briefing arrives here within minutes.</p>
+        <button class="btn primary" data-go="#/appoint">Appoint an Official</button></div></div>`;
+      $('[data-go]', viewer).onclick = () => app.go('#/appoint');
       stageKey = '';
       return;
     }
@@ -70,7 +70,7 @@ export function mount(root, app, [briefingId]) {
     if (!$('.viewer-bar', viewer) || $('.viewer-bar', viewer).dataset.id !== b.id) {
       viewer.innerHTML = `
         <div class="viewer-bar" data-id="${b.id}">
-          <div class="who">${emblem(ctx.from.name, 28)}<div><b>${esc(b.title)}</b><span class="muted" style="font-size:12px">${esc(ctx.from.name)} · ${esc(new Date(b.createdAt).toLocaleString())}</span></div></div>
+          <div class="who">${monogram(ctx.from.name, 28)}<div><b>${esc(b.title)}</b><span class="muted" style="font-size:12px">${esc(ctx.from.name)} · ${esc(new Date(b.createdAt).toLocaleString())}</span></div></div>
           <span class="spacer"></span>
           <label class="style-pick">Style <select class="styles"></select></label>
           <button class="btn ghost sm" data-studio title="Edit how briefings look">Customize</button>

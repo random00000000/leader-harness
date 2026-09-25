@@ -1,33 +1,33 @@
-// Setup console: appoint (spawn) a Senior Official. The same form edits an
-// existing official from its detail page.
-import { $, $$, esc, emblem, cadenceLabel, toast } from '../util.js';
+// Setup console: appoint a Senior Official. The same form edits an existing
+// Official from its detail page.
+import { $, $$, esc, monogram, cadenceLabel, toast } from '../util.js';
 
 const PRESETS = [
   {
-    label: 'Game minister',
-    title: 'Minister for the Game',
-    remit: 'Own the development of this game. Track progress against the roadmap, keep the build healthy, push the next most valuable feature forward, and tell me what changed and what needs my call.',
+    label: 'Project Lead',
+    title: 'Project Lead',
+    remit: 'Own delivery of this project. Track progress against the roadmap, keep the build healthy, advance the next most valuable piece of work, and report what changed and what needs my decision.',
     authority: 'build',
     workCadence: { mode: 'interval', minutes: 240 },
   },
   {
     label: 'Chief of Staff',
     title: 'Chief of Staff',
-    remit: 'Keep watch over my projects and their wikis. Tell me what moved, what stalled, and what deserves my attention today. Keep my priorities list current.',
+    remit: 'Monitor my projects and their wikis. Report what moved, what stalled, and what needs my attention today. Keep my priorities list current.',
     authority: 'observe',
     workCadence: { mode: 'manual' },
   },
   {
     label: 'Director of Research',
     title: 'Director of Research',
-    remit: 'Research the questions I care about, keep findings in the wiki with sources, and brief me on what is new and what it means for my projects.',
+    remit: 'Research the questions I set, keep findings in the wiki with sources, and brief me on what is new and what it means for my work.',
     authority: 'observe',
     workCadence: { mode: 'interval', minutes: 720 },
   },
   {
-    label: 'Quartermaster',
-    title: 'Quartermaster of Code',
-    remit: 'Keep the codebase in fighting shape: failing tests, outdated dependencies, warnings, dead code. Fix what is safe to fix and report the rest.',
+    label: 'Head of Engineering',
+    title: 'Head of Engineering',
+    remit: 'Keep the codebase healthy: failing tests, outdated dependencies, warnings, dead code. Fix what is safe to fix and report the rest.',
     authority: 'build',
     workCadence: { mode: 'interval', minutes: 1440 },
   },
@@ -49,7 +49,7 @@ function cadenceControl(name, c) {
     <select data-mode>
       <option value="daily" ${mode === 'daily' ? 'selected' : ''}>Daily at…</option>
       <option value="interval" ${mode === 'interval' ? 'selected' : ''}>Repeating…</option>
-      <option value="manual" ${mode === 'manual' ? 'selected' : ''}>Only when I order it</option>
+      <option value="manual" ${mode === 'manual' ? 'selected' : ''}>Only when I ask</option>
     </select>
     <input type="time" data-time value="${esc(c?.time || '08:00')}" ${mode === 'daily' ? '' : 'hidden'}>
     <select data-minutes ${mode === 'interval' ? '' : 'hidden'}>${INTERVALS.map(([m, l]) => `<option value="${m}" ${Number(c?.minutes) === m ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -83,18 +83,18 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
   const creating = mode === 'create';
 
   root.innerHTML = `
-    <div class="spawn">
+    <div class="appoint-grid">
       <form class="card console" autocomplete="off">
-        <div class="console-head"><i></i><i></i><i></i><span style="margin-left:8px">${creating ? 'leader-harness › appoint-official' : `leader-harness › ${esc(v.name)} › orders`}</span></div>
+        <div class="console-head"><i></i><i></i><i></i><span style="margin-left:8px">${creating ? 'leader-harness › appoint-official' : `leader-harness › ${esc(v.name)} › instructions`}</span></div>
         <div class="console-body">
           ${creating ? `<div class="step"><div class="step-title"><b>$</b>start from a template</div>
             <div class="presets">${PRESETS.map((p, i) => `<button type="button" class="btn sm" data-preset="${i}">${esc(p.label)}</button>`).join('')}</div></div>` : ''}
           <div class="step"><div class="step-title"><b>01</b>who are they</div>
             <div class="grid-2">
-              <label class="field"><span>Name</span><input type="text" name="name" value="${esc(v.name)}" placeholder="e.g. Marshal Ardent" required></label>
-              <label class="field"><span>Title</span><input type="text" name="title" value="${esc(v.title)}" placeholder="e.g. Minister for Victory Marche" required></label>
+              <label class="field"><span>Name</span><input type="text" name="name" value="${esc(v.name)}" placeholder="e.g. Sarah Chen" required></label>
+              <label class="field"><span>Title</span><input type="text" name="title" value="${esc(v.title)}" placeholder="e.g. Head of Engineering, Northwind" required></label>
             </div>
-            <label class="field"><span>Remit: what they own and what you expect</span><textarea name="remit" required placeholder="Own the development of…">${esc(v.remit)}</textarea></label>
+            <label class="field"><span>Remit: what they own and what you expect from them</span><textarea name="remit" required placeholder="e.g. Own delivery of the Northwind platform and report what needs my decision.">${esc(v.remit)}</textarea></label>
           </div>
           ${creating ? `<div class="step"><div class="step-title"><b>02</b>what they manage</div>
             <div class="field"><span>Project folder (optional)</span>
@@ -142,7 +142,7 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
           </div>
           <div class="row" style="justify-content:flex-end;gap:8px">
             <button type="button" class="btn ghost" data-cancel>Cancel</button>
-            <button class="btn primary">${creating ? 'Appoint and request first briefing' : 'Save orders'}</button>
+            <button class="btn primary">${creating ? 'Appoint and request first briefing' : 'Save instructions'}</button>
           </div>
         </div>
       </form>
@@ -174,10 +174,10 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
     const project = creating ? c.projectPath : v.projectPath;
     const folderName = project ? project.split(/[\\/]/).filter(Boolean).pop() : '';
     $('.preview-card', root).innerHTML = `
-      <div class="eyebrow">${creating ? 'Appointment' : 'Current orders'}</div>
-      <div class="official-head">${emblem(c.name || '?', 52)}<div><h3 style="margin:0;font-size:18px">${esc(c.name || 'Unnamed official')}</h3><p class="muted" style="margin:2px 0 0">${esc(c.title || 'No title yet')}</p></div></div>
+      <div class="eyebrow">${creating ? 'Appointment' : 'Current instructions'}</div>
+      <div class="official-head">${monogram(c.name || '?', 52)}<div><h3 style="margin:0;font-size:18px">${esc(c.name || 'New Official')}</h3><p class="muted" style="margin:2px 0 0">${esc(c.title || 'No title yet')}</p></div></div>
       <div class="explain">
-        <div>Briefs you: <b>${esc(cadenceLabel(c.briefingCadence).toLowerCase())}</b></div>
+        <div>Reports to you: <b>${esc(cadenceLabel(c.briefingCadence).toLowerCase())}</b></div>
         <div>Works in the background: <b>${esc(cadenceLabel(c.workCadence).toLowerCase())}</b></div>
         <div>Authority: <b>${esc(a?.label)}</b>. ${esc(a?.summary)}</div>
         <div>Memory: <b>${project ? `${esc(folderName)} wiki` : 'its own wiki'}</b>, in the same pattern as this project's wiki.</div>
@@ -233,13 +233,13 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
 }
 
 export function mount(root, app) {
-  root.innerHTML = `<div class="page"><div class="page-head"><div><div class="eyebrow">Setup</div><h1>Appoint a Senior Official</h1>
-    <p>They own an area, work in the background with Claude Code, and brief you on the schedule you set.</p></div></div><div data-form></div></div>`;
+  root.innerHTML = `<div class="page"><div class="page-head"><div><div class="eyebrow">Setup</div><h1>Appoint an Official</h1>
+    <p>An Official owns an area, works in the background with Claude Code, and briefs you on the schedule you set.</p></div></div><div data-form></div></div>`;
   officialForm($('[data-form]', root), app, {}, {
     mode: 'create',
     onSubmit: async (input) => {
       const o = await app.call('official:spawn', input);
-      toast(`${o.name} appointed. First briefing is being prepared.`);
+      toast(`${o.name} appointed. The first briefing is being prepared.`);
       app.go(`#/official/${o.id}`);
     },
   });

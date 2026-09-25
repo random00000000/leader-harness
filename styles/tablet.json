@@ -1,8 +1,8 @@
 {
   "id": "tablet",
   "order": 4,
-  "name": "Daily Brief Tablet",
-  "description": "The brief as a secure tablet app, card by card.",
+  "name": "Daily Brief",
+  "description": "The brief as read on a secure tablet, item by item.",
   "layout": "tablet",
   "vars": {
     "--backdrop": "linear-gradient(160deg, #1a2433, #0b0f16)",

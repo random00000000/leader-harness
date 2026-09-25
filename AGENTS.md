@@ -4,7 +4,7 @@ This file is the single source of agent instructions for this project. Codex rea
 
 ## Project
 
-Leader Harness is an AI harness shaped for leaders of organizations. The leader sits at the top of a pyramid: a Senior Official produces **Briefings** for the leader, and specialist agents run on schedules (hourly, daily, ...) to do the work. The leader acts through short, Hearts of Iron 4-style event popups rather than sitting at a prompt. Claude Code is the main agent backend (it is better at background work); Codex may follow later. It is a desktop app that runs locally on the leader's machine.
+Leader Harness is an AI harness shaped for leaders of organizations. The leader sits at the top of a pyramid: a Senior Official produces **Briefings** for the leader, and specialist agents run on schedules (hourly, daily, ...) to do the work. The leader acts by answering short decision requests rather than sitting at a prompt. The product voice is serious and executive, like an intelligence service; all user-facing text follows `Leader Harness - Wiki/Systems/PATTERN - Voice And Tone.md`. It must stay lightweight on the leader's machine (see `Systems/Desktop App.md`, Performance). Claude Code is the main agent backend (it is better at background work); Codex may follow later. It is a desktop app that runs locally on the leader's machine.
 
 **Current phase: building v0.1.** The app is Electron with plain ES modules and no build step: `npm install`, `npm start`, and `npm run check` (run it before finishing any change). Main process code is in `src/main/`, the renderer in `src/renderer/`, and Briefing styles in `styles/`. Source files use LF line endings. Record designs not yet built as `PLAN - <Name>.md` pages in the wiki's `Systems/` folder.
 
