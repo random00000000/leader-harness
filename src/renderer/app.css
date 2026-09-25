@@ -264,3 +264,17 @@ textarea.css { font-family: var(--mono); font-size: 12px; min-height: 260px; whi
   .tiles { grid-template-columns: repeat(2, 1fr); }
   .studio { grid-template-columns: 200px 320px 1fr; }
 }
+
+/* ---------- suggested officials ---------- */
+.suggestions { margin-bottom: 22px; display: grid; gap: 12px; }
+.sg-head { display: flex; align-items: flex-end; gap: 12px; }
+.sg-head .btn { margin-left: auto; }
+.sg-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.sg-card { padding: 16px; display: grid; gap: 10px; align-content: start; }
+.sg-card .btn { justify-self: start; margin-top: 2px; }
+.sg-project { font-size: 12px; color: var(--gold); }
+.sg-why { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.sg-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.sg-note { padding: 14px 16px; border: 1px dashed var(--line-2); border-radius: 10px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+.sg-note.bad { color: var(--danger); border-color: rgba(229, 100, 90, 0.4); }
+.sg-privacy { font-size: 11.5px; }
