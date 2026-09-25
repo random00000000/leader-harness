@@ -4,9 +4,18 @@
 const fs = require('fs');
 const { id } = require('./store');
 const { runClaude, findClaude } = require('./runner');
+const { syncWorkspace } = require('./workspace');
 const P = require('./prompts');
 
 const TICK_MS = 20 * 1000;
+
+// Where an Official's sessions run. An isolated Official never falls back to
+// the Leader's checkout: a missing workspace returns null and the job fails.
+function workDirFor(official) {
+  if (official.workspace) return fs.existsSync(official.workspace.path) ? official.workspace.path : null;
+  if (official.projectPath && fs.existsSync(official.projectPath)) return official.projectPath;
+  return official.homeDir;
+}
 
 // cadence: { mode: 'manual' } | { mode: 'interval', minutes } | { mode: 'daily', time: 'HH:MM' }
 function isDue(cadence, lastIso, now = new Date()) {
@@ -54,7 +63,7 @@ class Scheduler {
 
   stop() {
     clearInterval(this.timer);
-    for (const child of this.running.values()) child.kill();
+    for (const child of this.running.values()) child?.kill();
   }
 
   // ---- queueing -------------------------------------------------------
@@ -162,7 +171,8 @@ class Scheduler {
       prompt = P.workPrompt(official);
     }
 
-    const cwd = official.projectPath && fs.existsSync(official.projectPath) ? official.projectPath : official.homeDir;
+    const cwd = workDirFor(official);
+    if (!cwd) return this.finish(job, { ok: false, error: `The Official's workspace is missing (${official.workspace?.path}). Remove and re-appoint the Official.` });
     let perms;
     try {
       perms = P.toolsFor(official, cwd);
@@ -170,6 +180,14 @@ class Scheduler {
       return this.finish(job, { ok: false, error: err.message });
     }
     this.store.update(() => Object.assign(job, { status: 'running', startedAt: new Date().toISOString() }));
+
+    // Reserve the slot while the workspace fetches, so pump() counts it.
+    this.running.set(job.id, null);
+    if (official.workspace) await syncWorkspace(cwd);
+    if (this.cancelled.delete(job.id)) {
+      this.running.delete(job.id);
+      return this.finish(job, { ok: false, error: 'Cancelled by the Leader.' }, 'cancelled');
+    }
 
     const { child, done } = runClaude({
       claudePath,
@@ -313,10 +331,11 @@ class Scheduler {
   }
 
   cancelJob(jobId) {
-    const child = this.running.get(jobId);
-    if (child) {
+    if (this.running.has(jobId)) {
+      // A null entry is a session still fetching its workspace; run() checks
+      // `cancelled` before it starts Claude Code.
       this.cancelled.add(jobId);
-      child.kill();
+      this.running.get(jobId)?.kill();
     }
     this.store.update((s) => {
       const job = s.jobs.find((j) => j.id === jobId);
@@ -325,4 +344,4 @@ class Scheduler {
   }
 }
 
-module.exports = { Scheduler, isDue, nextDue };
+module.exports = { Scheduler, isDue, nextDue, workDirFor };

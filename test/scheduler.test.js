@@ -79,3 +79,13 @@ test('paused work never starts a session', () => {
   assert.equal(store.get().jobs[0].status, 'queued');
   assert.equal(scheduler.running.size, 0);
 });
+
+test('an isolated Official never falls back to the Leader checkout', () => {
+  const { workDirFor } = require('../src/main/scheduler');
+  const project = require('./helpers').tempDir();
+  const missing = makeOfficial({ projectPath: project, workspace: { path: project + '-gone', branch: 'official/x', base: 'origin/main' } });
+  assert.equal(workDirFor(missing), null);
+  const present = makeOfficial({ projectPath: project, workspace: { path: project, branch: 'official/x', base: 'origin/main' } });
+  assert.equal(workDirFor(present), project);
+  assert.equal(workDirFor(makeOfficial({ projectPath: project })), project);
+});

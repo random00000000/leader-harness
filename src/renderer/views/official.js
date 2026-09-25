@@ -46,7 +46,14 @@ export function mount(root, app, [officialId]) {
     const jobs = s.jobs.filter((j) => j.officialId === off.id).sort((a, b) => (b.startedAt || b.createdAt).localeCompare(a.startedAt || a.createdAt)).slice(0, 12);
     $('[data-side]', root).innerHTML = `
       <div class="card section">
-        <h2>Memory</h2>
+        <h2>Workspace</h2>
+        ${off.workspace
+          ? `<div class="muted" style="font-size:12.5px">Isolated copy on branch <span class="mono">${esc(off.workspace.branch)}</span>, based on <span class="mono">${esc(off.workspace.base)}</span>. Your checkout is never edited.</div>
+             <div class="mono faint" style="font-size:12px;word-break:break-all">${esc(off.workspace.path)}</div>`
+          : off.projectPath
+            ? '<div class="muted" style="font-size:12.5px">Works directly in the project folder.</div>'
+            : ''}
+        <div class="muted" style="font-size:12.5px;margin-top:4px">Wiki</div>
         <div class="mono faint" style="font-size:12px;word-break:break-all">${esc(off.wikiDir)}</div>
         <div class="row"><button class="btn sm" data-wiki>Open wiki</button>${off.projectPath ? '<button class="btn sm" data-project>Open project</button>' : ''}</div>
         <div class="muted" style="font-size:12.5px">Next briefing ${off.nextBriefingAt ? esc(relTime(off.nextBriefingAt)) : 'on order only'} · next work ${off.nextWorkAt ? esc(relTime(off.nextWorkAt)) : 'on order only'}</div>
@@ -76,7 +83,7 @@ export function mount(root, app, [officialId]) {
       </div>
       <div class="card section">
         <h2>Remove</h2>
-        <div class="muted" style="font-size:13px">Stops all scheduled work. The Official's wiki is kept on disk.</div>
+        <div class="muted" style="font-size:13px">Stops all scheduled work. An isolated workspace is removed, but its branch and commits are kept; otherwise the wiki stays on disk.</div>
         <div><button class="btn danger sm" data-dismiss>Remove ${esc(off.name)}</button></div>
       </div>`;
     $('[data-wiki]', root).onclick = () => app.call('open:path', off.wikiDir);

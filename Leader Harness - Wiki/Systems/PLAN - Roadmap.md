@@ -27,16 +27,8 @@ Goal (the human, 2026-09-25): "Ideally the harness gets to a state that can deve
 ### 3. Workspace guard hook: DONE (2026-09-25)
 `src/main/guard.js` runs as a PreToolUse hook on every session and fails closed. See [[Systems/Senior Officials]], Workspace guard.
 
-### 4. Isolated workspace per Official: READY
-Why: an Official developing *this* app must not edit the copy the Leader is running. More generally, Officials should work on their own checkout and deliver through pull requests, never on the Leader's working tree.
-- Add an appointment option, "Work in an isolated copy" (on by default when the project is a git repository).
-- On appointment, create `userData/officials/<id>/workspace` as a `git worktree` of the project on branch `official/<slug>`. If worktree creation fails, fall back to a `git clone`.
-- Before each session, fetch and fast-forward the workspace's base branch.
-- The Official's working directory, and its wiki root, become the workspace. The wiki is the project's own `<Project> - Wiki/`, so wiki changes also travel through pull requests.
-- Removing an Official removes its worktree; the branch is kept.
-
-Acceptance: unit tests for the workspace setup against a temp git repo with a local bare remote. The Leader's checkout stays byte-identical after a session.
-Verify: `npm test`, then one real haiku session under Build in an isolated copy of a temp repo: its commit exists in the workspace branch and not in the original checkout.
+### 4. Isolated workspace per Official: DONE (2026-09-25)
+`src/main/workspace.js`: each git-project Official works in its own worktree on `official/<name>`. See [[Systems/Senior Officials]], Isolated workspace.
 
 ### 5. Self-development template: READY
 Why: make appointing the harness's own engineer a one-click, correctly-configured act.
