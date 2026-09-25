@@ -67,9 +67,9 @@ Each decision states the situation and gives you:
 
 ## Your Officials
 
-Not sure whom to appoint? The Appoint screen reads your recent Claude Code and Codex threads on this computer and **suggests three Officials** for the work you do most, each with a project, a remit and a reason. One click fills in the appointment.
+Not sure whom to appoint? The Officials screen reads your recent Claude Code and Codex threads on this computer and **suggests three Officials** for the work you do most, each with a project, a remit and a reason. One click opens the appointment, already filled in.
 
-<img src="docs/screenshots/officials.png" alt="The Officials screen with three Senior Officials" width="900">
+<img src="docs/screenshots/officials.png" alt="The Officials screen with three suggested Officials above the appointed ones" width="900">
 
 For each Official you set:
 - **A remit,** and optionally a project folder.
