@@ -112,22 +112,22 @@ Verify: `dist/win-unpacked/Leader Harness.exe` with `LH_CAPTURE`.
 ### 10. Dogfood: an Official for this repo: HUMAN
 Appoint a Senior Official in the harness itself whose project is this repo and whose remit is this roadmap, so the Leader receives Briefings about the harness's own progress. The human decides when, and at what authority and cadence, because it spends real usage.
 
-### 11. License: HUMAN
-The repo is public, but it has no LICENSE, so by default all rights are reserved. The choice of license is the human's.
-
-### 12. Distribution terms: HUMAN (Q5)
+### 11. Distribution terms: HUMAN (Q5)
 Verify Anthropic's terms for apps that drive a user's own Claude Code subscription login before anything is shared with other people.
 
-### 13. "depseek harness" reference: HUMAN (Q3)
+### 12. "depseek harness" reference: HUMAN (Q3)
 Waiting for the human to identify it. Do not redesign the Style Studio on a guess.
 
-### 14. Codex backend: HUMAN
+### 13. Codex backend: HUMAN
 "Codex may follow later." Not scheduled until the human asks.
 
 ## Decided
 
 - **Public repo** (DECISION, human, 2026-09-25): "the repo should be public for this project". It is https://github.com/random00000000/leader-harness. Commits use the GitHub noreply identity.
 - **Automation ships its own work** (DECISION, human, 2026-09-25): "commit, push and merge". This matches D7 (commit, push and merge are Senior Official authority). The flow is in AGENTS.md under "Autonomous work". Revisit if an automated merge breaks main.
+
+- **MIT license** (DECISION, human, 2026-09-25): "use MIT license". Added `LICENSE`, with `"license": "MIT"` in package.json.
+- **README for humans** (DECISION, human, 2026-09-25): the README is written for visitors, with real screenshots in `docs/screenshots/` taken from seeded demo data. When the UI changes noticeably, retake them with the `LH_CAPTURE` hook (see [[Systems/Desktop App]]).
 
 ## Open edges
 

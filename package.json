@@ -3,6 +3,8 @@
   "productName": "Leader Harness",
   "version": "0.1.0",
   "description": "An AI harness shaped for leaders: Senior Officials run Claude Code in the background and brief you.",
+  "license": "MIT",
+  "repository": "github:random00000000/leader-harness",
   "main": "src/main/main.js",
   "private": true,
   "scripts": {
