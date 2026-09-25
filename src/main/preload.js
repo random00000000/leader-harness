@@ -12,6 +12,7 @@ const CHANNELS = new Set([
   'dispatch:open',
   'dispatch:close',
   'window:open',
+  'suggest:run',
   'official:spawn',
   'official:update',
   'official:setStatus',

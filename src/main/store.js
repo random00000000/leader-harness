@@ -51,6 +51,9 @@ class Store {
           job.finishedAt = job.finishedAt || new Date().toISOString();
         }
       }
+      if (state.suggestions?.status === 'running') {
+        state.suggestions = { ...state.suggestions, status: 'failed', error: 'Interrupted: the app closed while suggestions were being prepared.' };
+      }
       return state;
     } catch (err) {
       if (err.code !== 'ENOENT') console.error('State file unreadable, starting fresh:', err.message);

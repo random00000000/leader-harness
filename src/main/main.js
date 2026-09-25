@@ -1,6 +1,7 @@
 // Leader Harness: Electron main process. Owns state, the scheduler, the tray,
 // notifications, and the IPC surface the renderer uses.
-const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, Notification, nativeImage, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, Notification, nativeImage, screen, utilityProcess } = require('electron');
+const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const { Store, id } = require('./store');
@@ -10,6 +11,7 @@ const { gitRoot, createWorkspace, removeWorkspace, inspectProject } = require('.
 const { findClaude } = require('./runner');
 const { AUTHORITY } = require('./prompts');
 const { welcomeBriefing } = require('./welcome');
+const { suggestOfficials } = require('./suggest');
 
 const ROOT = path.join(__dirname, '..', '..');
 const BUILTIN_STYLES = path.join(ROOT, 'styles');
@@ -275,6 +277,59 @@ function spawnOfficial(input) {
 
 const EDITABLE = ['name', 'title', 'remit', 'authority', 'model', 'style', 'briefingCadence', 'workCadence', 'decisionWindowMin', 'emblem'];
 
+// ---------------------------------------------------------------- suggestions
+
+// Suggested Officials: scan the Leader's recent Claude Code and Codex threads
+// in a utility process (never blocking the app), then ask Claude for three
+// suggestions. The result is cached in state.suggestions.
+let suggesting = false;
+
+function scanInWorker() {
+  return new Promise((resolve, reject) => {
+    const child = utilityProcess.fork(path.join(__dirname, 'threads-worker.js'), [], { serviceName: 'Leader Harness thread scan' });
+    let settled = false;
+    const timer = setTimeout(() => finish(new Error('The thread scan took too long.')), 120000);
+    function finish(err, result) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      child.kill();
+      if (err) reject(err);
+      else resolve(result);
+    }
+    child.once('message', (m) => (m.ok ? finish(null, m.result) : finish(new Error(m.error))));
+    child.once('exit', () => finish(new Error('The thread scan stopped unexpectedly.')));
+    child.postMessage({ exclude: [os.tmpdir(), app.getPath('userData')] });
+  });
+}
+
+async function runSuggestions() {
+  if (suggesting) return;
+  suggesting = true;
+  const startedAt = new Date().toISOString();
+  store.update((s) => (s.suggestions = { ...(s.suggestions || {}), status: 'running', startedAt, error: null }));
+  try {
+    const digest = await scanInWorker();
+    const claudePath = findClaude(store.get().settings.claudePath);
+    if (!claudePath) throw new Error('Claude Code was not found. Set its path in Settings.');
+    if (!digest.projects.length) throw new Error('No recent Claude Code or Codex threads were found on this computer.');
+    const { items } = await suggestOfficials({ claudePath, digest, officials: store.get().officials });
+    store.update(
+      (s) =>
+        (s.suggestions = {
+          status: 'ready',
+          generatedAt: new Date().toISOString(),
+          items,
+          basis: { claude: digest.scanned.claude, codex: digest.scanned.codex, projects: digest.projects.length },
+        })
+    );
+  } catch (err) {
+    store.update((s) => (s.suggestions = { ...(s.suggestions || {}), status: 'failed', error: err.message }));
+  } finally {
+    suggesting = false;
+  }
+}
+
 // ---------------------------------------------------------------- IPC
 
 function registerIpc() {
@@ -317,6 +372,10 @@ function registerIpc() {
   });
   handle('open:path', (p) => shell.openPath(p));
   handle('project:inspect', (folder) => inspectProject(folder));
+  handle('suggest:run', () => {
+    runSuggestions();
+    return true;
+  });
   handle('dispatch:open', () => showDispatch({ focus: true }));
   handle('dispatch:close', () => closeDispatch());
   handle('window:open', (route) => showWindow(typeof route === 'string' && route.startsWith('#/') ? route : '#/briefings'));
