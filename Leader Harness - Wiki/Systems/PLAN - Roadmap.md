@@ -21,14 +21,8 @@ Goal (the human, 2026-09-25): "Ideally the harness gets to a state that can deve
 ### 1. Test suite: DONE (2026-09-25)
 `npm test` (node:test, 23 tests in `test/`); `npm run check` runs it too. See [[Systems/Desktop App]], Tests.
 
-### 2. Continuous integration: READY
-Why: the repo is public and automation merges its own pull requests, so every PR needs an automatic gate.
-- Add `.github/workflows/check.yml`. It runs on pull requests and on pushes to main, on `windows-latest` with Node 22.
-- Steps: `npm ci` with `ELECTRON_SKIP_BINARY_DOWNLOAD=1` (the checks don't launch Electron), `npm run check`, then `npm test`.
-- The workflow must not need secrets and must never call Claude Code.
-
-Acceptance: the workflow passes on the PR that adds it.
-Verify: `gh pr checks <n>` shows it green before merging.
+### 2. Continuous integration: DONE (2026-09-25)
+`.github/workflows/check.yml` runs `npm run check` on every pull request and push to main. See [[Systems/Desktop App]], CI.
 
 ### 3. Workspace guard hook: READY
 Why: an Official must never touch anything outside its own workspace. Today only the prompt says so, apart from Observe's scoped Edit/Write; prompt-only rules have already failed once (see [[Systems/Senior Officials]], Tried and rejected). This item also closes the git-deny gap (`git -C . push` got past the prefix rules).
