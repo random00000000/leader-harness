@@ -6,7 +6,7 @@ const path = require('path');
 
 const TEMPLATES = path.join(__dirname, '..', '..', 'resources', 'wiki-templates');
 
-// "victory-marche" / "victoryMarche" / "victory_marche" -> "Victory Marche"
+// "northwind-platform" / "northwindPlatform" / "northwind_platform" -> "Northwind Platform"
 function displayName(folderName) {
   return folderName
     .replace(/[-_]+/g, ' ')

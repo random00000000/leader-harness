@@ -27,11 +27,11 @@ HYPOTHESIS, not contested. The human did not correct it and answered the decisio
 ## Decided (2026-09-24, human's answers)
 
 - **Backend** (DECISION): Claude Code is the main agent. Human: "Claude Code should be the main agent because is better than codex at background work." This replaces the earlier "Codex first" decision. Codex is optional later. Revisit if headless Claude Code can't be driven reliably from the app.
-- **D1. First job** (DECISION): being briefed. The Briefings and their styles are the day-one product. Pointing it at the human's projects comes second.
+- **D1. First job** (DECISION): being briefed. The Briefings and their styles are the day-one product. UPDATE (2026-09-25): the first real project is **the harness itself**. The human's other projects (games included) stay off limits until the human opens one. See [[Systems/PLAN - Roadmap]] items 3–6 and 13.
 - **D2. Where it runs** (DECISION): locally on the leader's machine, like Claude Code.
 - **D3. How the leader is reached** (DECISION): only on the PC for now. No phone or server.
 - **D4. Budget unit** (DECISION): subscription usage. It also needs a way to launch a deliberate **surge** (originally "big push"), meaning a concentrated effort that spends a lot of quota on one goal.
-- **D5. Senior Officials** (DECISION): the leader creates them freely. Example: an Official for one of the human's games that briefs on it and uses routines like Claude Code's to push work forward.
+- **D5. Senior Officials** (DECISION): the leader creates them freely. The human's original example was an Official for one of their games; for now the only project in scope is this harness (see D1).
 - **D6. Work tracking** (DECISION): every project the harness handles gets a wiki in this Karpathy pattern. Work is tracked and managed there.
 - **D7. Authority** (DECISION): commit, push and merge are Senior Official authority. See the open question Q2 below.
 - **D8. Cadence** (DECISION): dynamic and set per project, and it can change over time (e.g. daily now, hourly later for the same project).
