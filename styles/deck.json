@@ -1,0 +1,24 @@
+{
+  "id": "deck",
+  "order": 1,
+  "name": "Cabinet Deck",
+  "description": "A slide presentation, one idea per slide. Arrow keys to move.",
+  "layout": "deck",
+  "vars": {
+    "--backdrop": "#0e1117",
+    "--slide": "#161b24",
+    "--ink": "#e8ecf2",
+    "--muted": "#95a0b2",
+    "--accent": "#d6b25e",
+    "--chip": "#1f2632",
+    "--line": "#2a3240",
+    "--ok": "#5ec28a",
+    "--warn": "#e0a64a",
+    "--danger": "#e5645a",
+    "--radius": "14px",
+    "--shadow": "0 30px 80px rgba(0,0,0,.5)",
+    "--font-body": "'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif",
+    "--font-display": "'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif"
+  },
+  "css": ""
+}

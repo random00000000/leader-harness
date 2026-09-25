@@ -1,0 +1,28 @@
+{
+  "id": "tablet",
+  "order": 4,
+  "name": "Daily Brief Tablet",
+  "description": "The brief as a secure tablet app, card by card.",
+  "layout": "tablet",
+  "vars": {
+    "--backdrop": "linear-gradient(160deg, #1a2433, #0b0f16)",
+    "--bezel": "#10141a",
+    "--screen": "#f3f4f7",
+    "--card": "#ffffff",
+    "--hero": "#12233d",
+    "--hero-ink": "#ffffff",
+    "--hero-accent": "#9cc3ff",
+    "--ink": "#141821",
+    "--muted": "#6b7384",
+    "--accent": "#2563eb",
+    "--chip": "#eceff4",
+    "--line": "#e3e6ec",
+    "--routine": "#3d7a4f",
+    "--ok": "#2f9e5b",
+    "--warn": "#c7811b",
+    "--danger": "#c53030",
+    "--font-body": "'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif",
+    "--font-display": "Georgia, 'Times New Roman', serif"
+  },
+  "css": ""
+}

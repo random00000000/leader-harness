@@ -1,0 +1,22 @@
+{
+  "id": "redbox",
+  "order": 3,
+  "name": "Red Box",
+  "description": "A leather despatch box holding civil service submissions.",
+  "layout": "redbox",
+  "vars": {
+    "--backdrop": "radial-gradient(ellipse at 50% 0%, #2b2320, #121010 70%)",
+    "--leather": "#8e1b1b",
+    "--gold": "#e2c071",
+    "--gold-dim": "#9c7d3a",
+    "--paper": "#fbf8f1",
+    "--tint": "#f6ebe6",
+    "--ink": "#1d1b19",
+    "--muted": "#a8988a",
+    "--muted-ink": "#6d655d",
+    "--rule": "#d9d1c4",
+    "--font-body": "Georgia, 'Times New Roman', serif",
+    "--font-display": "'Palatino Linotype', Palatino, Georgia, serif"
+  },
+  "css": ""
+}

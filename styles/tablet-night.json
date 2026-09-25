@@ -1,0 +1,28 @@
+{
+  "id": "tablet-night",
+  "order": 5,
+  "name": "Night Tablet",
+  "description": "The Daily Brief Tablet after dark. An example of a style built on another layout.",
+  "layout": "tablet",
+  "vars": {
+    "--backdrop": "#05070a",
+    "--bezel": "#0b0d11",
+    "--screen": "#0f1319",
+    "--card": "#171c25",
+    "--hero": "#241c0b",
+    "--hero-ink": "#f4ead2",
+    "--hero-accent": "#d6b25e",
+    "--ink": "#e6e9ef",
+    "--muted": "#8b94a5",
+    "--accent": "#d6b25e",
+    "--chip": "#222834",
+    "--line": "#232a36",
+    "--routine": "#2d5a3a",
+    "--ok": "#5ec28a",
+    "--warn": "#e0a64a",
+    "--danger": "#e5645a",
+    "--font-body": "'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif",
+    "--font-display": "Georgia, 'Times New Roman', serif"
+  },
+  "css": ".chips span.rec, .decide { color: #16120a; }"
+}

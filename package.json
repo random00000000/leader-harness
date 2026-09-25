@@ -1,0 +1,16 @@
+{
+  "name": "leader-harness",
+  "productName": "Leader Harness",
+  "version": "0.1.0",
+  "description": "An AI harness shaped for leaders: Senior Officials run Claude Code in the background and brief you.",
+  "main": "src/main/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "postinstall": "node node_modules/electron/install.js",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5"
+  }
+}
