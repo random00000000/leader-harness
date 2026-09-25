@@ -59,6 +59,26 @@ class App {
     return this.styles.find((s) => s.id === styleId) || this.styles.find((s) => s.id === this.state.settings.defaultStyle) || this.styles[0];
   }
 
+  // One path for every decision, wherever it is taken (briefing, popup).
+  // Returns true when recorded.
+  async resolveDecision(decisionId, choice) {
+    const d = this.state.decisions.find((x) => x.id === decisionId);
+    if (!d || d.status !== 'pending') return false;
+    try {
+      const result = await this.call('decision:resolve', decisionId, choice);
+      this.ui.focusDecision = decisionId;
+      if (d.sample) {
+        if (result?.route) this.go(result.route);
+        return true;
+      }
+      const o = this.officialById(d.officialId);
+      toast(choice.halt ? `${o?.name || 'Official'}: work halted. Resume from Officials.` : `Decision recorded. Instruction sent to ${o?.name || 'the Official'}.`);
+      return true;
+    } catch {
+      return false; // the error toast is already shown
+    }
+  }
+
   async reloadStyles() {
     this.styles = await this.call('styles:list');
   }
@@ -69,8 +89,12 @@ class App {
     window.lh.onState((state) => this.onState(state));
     window.lh.onNavigate((route) => this.go(route));
     window.addEventListener('hashchange', () => this.route());
-    window.addEventListener('message', (e) => {
-      if (e.data?.lh === 'decide') this.modal.open(e.data.id);
+    // Decisions taken inside a briefing. Only our own briefing frames may send them.
+    window.addEventListener('message', async (e) => {
+      const fromBriefing = [...document.querySelectorAll('iframe.stage-frame')].some((f) => f.contentWindow === e.source);
+      if (!fromBriefing || e.data?.lh !== 'choose' || !e.data.id || !e.data.choice) return;
+      const ok = await this.resolveDecision(e.data.id, e.data.choice);
+      if (!ok) e.source.postMessage({ lh: 'decision-failed' }, '*');
     });
     if (!location.hash) location.hash = '#/briefings';
     this.renderChrome();

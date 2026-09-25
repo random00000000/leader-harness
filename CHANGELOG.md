@@ -2,9 +2,11 @@
 
 One line per merged pull request, newest first. Versions follow semver; releases are built with `npm run release`.
 
-## Unreleased
+## 0.3.0
 
-- Releases also add a Leader Harness entry to the Start menu.
+- Decide inside every briefing format: pick and confirm, give a different instruction, or halt, without leaving the report.
+- Dispatch: a corner panel that brings new briefings and decisions to the Leader; the tray icon opens it.
+- Releases also add a Leader Harness entry to the Start menu. (#12)
 
 ## 0.2.0
 

@@ -1,6 +1,6 @@
 // Daily Brief: the brief as it would be read on a secure tablet, in the
 // manner of a presidential daily brief.
-import { esc, fmtDate, STATUS, LEVEL, decisionState, decideButton } from './common.js';
+import { esc, fmtDate, STATUS, LEVEL, decisionState, decisionControls } from './common.js';
 
 export function render(b, ctx) {
   return `
@@ -23,12 +23,11 @@ export function render(b, ctx) {
             .map((d) => {
               const st = decisionState(d);
               return `
-          <section class="card decision ${st.open ? 'open' : 'closed'}">
+          <section class="card decision ${st.open ? 'open' : 'closed'}" data-decision-block="${esc(d.id)}">
             <div class="label">${st.open ? 'Decision needed' : 'Decision'}</div>
             <h2>${esc(d.title)}</h2>
             <p>${esc(d.body)}</p>
-            <div class="chips">${d.options.map((o) => `<span class="${o.recommended ? 'rec' : ''}">${esc(o.label)}</span>`).join('')}</div>
-            <div class="row">${decideButton(d, 'Review decision')}</div>
+            ${decisionControls(d)}
           </section>`;
             })
             .join('')}
@@ -70,12 +69,7 @@ h2 { font-family: var(--font-display); font-size: 19px; margin: 0 0 6px; }
 .card p { margin: 0; line-height: 1.55; font-size: 15px; }
 .article p { font-family: var(--font-display); font-size: 16px; }
 .decision.open { box-shadow: 0 0 0 2px var(--accent); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
-.chips span { font-size: 12px; padding: 5px 10px; border-radius: 99px; background: var(--chip); }
-.chips span.rec { background: var(--accent); color: #fff; }
-.row { display: flex; justify-content: flex-end; }
-.decide { font: inherit; font-size: 14px; font-weight: 600; background: var(--accent); color: #fff; border: 0; border-radius: 10px; padding: 9px 18px; cursor: pointer; }
-.decided { color: var(--muted); font-size: 13px; font-style: italic; }
+:root { --decide-accent: var(--accent); --decide-on-accent: #fff; --decide-bg: var(--chip); --decide-line: var(--line); --decide-field: var(--card); --decide-danger: var(--danger); --decide-radius: 10px; }
 .line { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.45; }
 .line:first-of-type { border-top: 0; }
 .line span { flex: 1; }

@@ -29,6 +29,7 @@ Leader Harness should read like an intelligence service or an executive office: 
 | Halt work / Resume work | kill, freeze |
 | Project Lead, Chief of Staff, Director of Research, Head of Engineering | Minister, Quartermaster, Marshal |
 | Monogram (the Official's initials) | emblem, shield, crest |
+| Dispatch (the corner panel that brings briefings to the Leader) | inbox, feed, notifications center |
 
 Built-in style names: **Slide Deck**, **Dossier**, **Red Box**, **Daily Brief**, **Daily Brief (Night)**.
 

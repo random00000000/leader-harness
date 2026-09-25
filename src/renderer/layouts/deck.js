@@ -1,5 +1,5 @@
 // Slide Deck: a 16:9 slide presentation. Arrow keys, click, or dots to move.
-import { esc, fmtDate, STATUS, LEVEL, fromLine, decisionState, decideButton } from './common.js';
+import { esc, fmtDate, STATUS, LEVEL, fromLine, decisionState, decisionControls } from './common.js';
 
 function chunk(list, n) {
   const out = [];
@@ -15,6 +15,10 @@ export function render(b, ctx) {
       <h1>${esc(b.title)}</h1>
       <p class="from">Briefing by ${fromLine(ctx)}</p>
       <p class="date">${esc(fmtDate(b.createdAt))}</p>
+      ${(() => {
+        const open = ctx.decisions.filter((d) => decisionState(d).open);
+        return open.length ? `<button class="await" data-goto-decision="${esc(open[0].id)}">${open.length} decision${open.length > 1 ? 's' : ''} awaiting you: review now</button>` : '';
+      })()}
     </section>`);
   slides.push(`
     <section class="slide bluf-slide">
@@ -44,14 +48,11 @@ export function render(b, ctx) {
   for (const d of ctx.decisions) {
     const st = decisionState(d);
     slides.push(`
-    <section class="slide decision-slide ${st.open ? 'open' : 'closed'}">
-      <div class="kicker">Decision required</div>
+    <section class="slide decision-slide ${st.open ? 'open' : 'closed'}" data-decision-block="${esc(d.id)}">
+      <div class="kicker">${st.open ? 'Decision required' : 'Decision'}</div>
       <h2>${esc(d.title)}</h2>
       <p class="body">${esc(d.body)}</p>
-      <div class="options">${d.options
-        .map((o) => `<div class="option ${o.recommended ? 'rec' : ''}"><strong>${esc(o.label)}</strong><span>${esc(o.detail)}</span>${o.recommended ? '<em>Recommended</em>' : ''}</div>`)
-        .join('')}</div>
-      <div class="decide-row">${decideButton(d, 'Review decision')}</div>
+      ${decisionControls(d)}
     </section>`);
   }
   if ((b.next || []).length) {
@@ -90,12 +91,15 @@ document.querySelector('.prev').onclick = () => show(cur - 1);
 document.querySelector('.next').onclick = () => show(cur + 1);
 dots.forEach((d) => (d.onclick = () => show(+d.dataset.go)));
 document.addEventListener('keydown', (e) => {
+  if (e.target.closest('textarea, button')) return;
   if (['ArrowRight', 'PageDown', ' '].includes(e.key)) show(cur + 1);
   if (['ArrowLeft', 'PageUp'].includes(e.key)) show(cur - 1);
   if (e.key === 'Home') show(0);
   if (e.key === 'End') show(slides.length - 1);
 });
-show(0);
+const slideOf = (id) => slides.findIndex((s) => s.dataset.decisionBlock === id);
+window.addEventListener('lh-goto', (e) => show(slideOf(e.detail)));
+show(window.LH_FOCUS && slideOf(window.LH_FOCUS) >= 0 ? slideOf(window.LH_FOCUS) : 0);
 `;
 
 export const css = `
@@ -112,6 +116,10 @@ html, body { margin: 0; height: 100%; background: var(--backdrop); color: var(--
 }
 .slide::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent); }
 .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+.decision-slide { justify-content: flex-start; overflow-y: auto; font-size: clamp(11px, 1.25vw, 18px); }
+.await { align-self: flex-start; font: inherit; font-size: .8em; font-weight: 600; margin-top: .6em; padding: .55em 1.1em; border-radius: 99px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+.await:hover { background: var(--accent); color: var(--slide); }
+:root { --decide-accent: var(--accent); --decide-on-accent: var(--slide); --decide-bg: var(--chip); --decide-line: var(--line); --decide-field: var(--backdrop); --decide-danger: var(--danger); --decide-radius: calc(var(--radius) / 2); }
 .kicker { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .18em; font-size: .72em; color: var(--accent); font-weight: 600; }
 h1 { font-family: var(--font-display); font-size: 2.6em; line-height: 1.08; margin: 0; font-weight: 700; letter-spacing: -.01em; }
 h2 { font-family: var(--font-display); font-size: 1.8em; margin: 0; line-height: 1.15; }
@@ -129,15 +137,6 @@ h2 { font-family: var(--font-display); font-size: 1.8em; margin: 0; line-height:
 .chip { flex: none; font-size: .62em; text-transform: uppercase; letter-spacing: .1em; padding: .3em .6em; border-radius: 4px; background: var(--chip); font-weight: 600; }
 .s-done, .r-low { color: var(--ok); } .s-in_progress, .r-medium { color: var(--warn); } .s-blocked, .r-high { color: var(--danger); }
 .body { margin: 0; line-height: 1.5; color: var(--muted); max-width: 60ch; }
-.options { display: grid; grid-template-columns: repeat(auto-fit, minmax(10em, 1fr)); gap: .8em; }
-.option { background: var(--chip); border-radius: calc(var(--radius) / 2); padding: .9em 1em; display: flex; flex-direction: column; gap: .35em; font-size: .85em; border: 1px solid transparent; position: relative; }
-.option span { color: var(--muted); font-size: .9em; line-height: 1.35; }
-.option.rec { border-color: var(--accent); }
-.option em { position: absolute; top: -.8em; right: .8em; background: var(--accent); color: var(--slide); font-style: normal; font-size: .62em; padding: .2em .6em; border-radius: 99px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
-.decide-row { display: flex; }
-.decide { font: inherit; font-size: .85em; font-weight: 600; background: var(--accent); color: var(--slide); border: 0; border-radius: 99px; padding: .6em 1.4em; cursor: pointer; }
-.decide:hover { filter: brightness(1.1); }
-.decided { color: var(--muted); font-size: .85em; font-style: italic; }
 .nav { display: flex; align-items: center; justify-content: center; gap: 16px; height: 52px; color: var(--muted); font-size: 13px; }
 .nav button { background: none; border: 1px solid var(--line); color: var(--ink); width: 34px; height: 34px; border-radius: 50%; font-size: 20px; line-height: 1; cursor: pointer; }
 .nav button:hover { border-color: var(--accent); color: var(--accent); }

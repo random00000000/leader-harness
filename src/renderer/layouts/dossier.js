@@ -1,6 +1,6 @@
 // Dossier: a typed memorandum in a file folder, with classification banners
 // at the top and bottom of the page as on real documents.
-import { esc, fmtDate, STATUS, LEVEL, decisionState, decideButton } from './common.js';
+import { esc, fmtDate, STATUS, LEVEL, decisionState, decisionControls } from './common.js';
 
 const STAMP = { ROUTINE: 'RESTRICTED', PRIORITY: 'CONFIDENTIAL', FLASH: 'TOP SECRET' };
 
@@ -35,13 +35,10 @@ export function render(b, ctx) {
           .map((d) => {
             const st = decisionState(d);
             return `
-          <section class="minute ${st.open ? 'open' : 'closed'}">
+          <section class="minute ${st.open ? 'open' : 'closed'}" data-decision-block="${esc(d.id)}">
             <h3>Minute for decision: ${esc(d.title)}</h3>
             <p>${esc(d.body)}</p>
-            <ul class="boxes">${d.options
-              .map((o) => `<li><span class="box">${!st.open && d.choice?.optionId === o.id ? '&#10007;' : ''}</span><div><b>${esc(o.label)}</b>${o.recommended ? ' <i>(recommended)</i>' : ''}<br><small>${esc(o.detail)}</small></div></li>`)
-              .join('')}</ul>
-            <div class="sign">${decideButton(d, 'Record decision')}</div>
+            ${decisionControls(d)}
           </section>`;
           })
           .join('')}
@@ -71,13 +68,7 @@ p { margin: 0 0 10px; }
 .tag { font-size: 12px; font-weight: 700; }
 .t-blocked, .r-high { color: var(--stamp); }
 .minute { margin-top: 26px; border: 1.5px solid var(--ink); padding: 4px 20px 16px; background: var(--minute); }
-.boxes { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
-.boxes li { display: flex; gap: 12px; align-items: flex-start; }
-.box { flex: none; width: 20px; height: 20px; border: 1.5px solid var(--ink); display: grid; place-items: center; font-size: 16px; color: var(--stamp); margin-top: 3px; }
-.boxes small { opacity: .75; }
-.sign { display: flex; justify-content: flex-end; }
-.decide { font-family: var(--font-display); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--paper); background: var(--ink); border: 0; padding: 9px 18px; cursor: pointer; font-size: 12px; }
-.decide:hover { background: var(--stamp); }
-.decided { font-style: italic; opacity: .8; }
+:root { --decide-accent: var(--ink); --decide-on-accent: var(--paper); --decide-bg: var(--paper); --decide-line: var(--ink); --decide-field: var(--paper); --decide-danger: var(--stamp); --decide-radius: 0; }
+.minute .lh-opt:hover, .minute .lh-go:hover { border-color: var(--stamp); }
 footer { margin-top: 36px; text-align: center; font-size: 11px; letter-spacing: .2em; color: var(--stamp); font-weight: 700; }
 `;

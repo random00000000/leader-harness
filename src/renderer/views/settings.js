@@ -19,7 +19,15 @@ export function mount(root, app) {
         <label class="field"><span>Default briefing style</span><select name="defaultStyle">${app.styles
           .map((st) => `<option value="${esc(st.id)}" ${st.id === s.defaultStyle ? 'selected' : ''}>${esc(st.name)}</option>`)
           .join('')}</select></label>
-        <label class="check"><input type="checkbox" name="notifications" ${s.notifications ? 'checked' : ''}><span>Windows notifications for new briefings and failures</span></label>
+        <label class="check"><input type="checkbox" name="notifications" ${s.notifications ? 'checked' : ''}><span>Deliver new briefings to me as they arrive</span></label>
+        <label class="field"><span>How briefings reach you</span><select name="delivery">${[
+          ['dispatch', 'Dispatch panel in the corner of the screen (recommended)'],
+          ['windows', 'Windows notification only'],
+          ['both', 'Dispatch panel and Windows notification'],
+        ]
+          .map(([v, l]) => `<option value="${v}" ${(s.delivery || 'dispatch') === v ? 'selected' : ''}>${l}</option>`)
+          .join('')}</select>
+          <small>The Dispatch panel shows new briefings and lets you decide without opening Leader Harness. Click the tray icon to open it at any time.</small></label>
         <div class="muted" style="font-size:12.5px;line-height:1.5">Closing the window keeps Leader Harness running in the system tray with minimal resources, so Officials keep working. To stop it completely, use Quit in the tray menu.</div>
         <div class="row" style="justify-content:flex-end"><button class="btn primary">Save settings</button></div>
       </form>
@@ -33,6 +41,7 @@ export function mount(root, app) {
       jobTimeoutMin: Math.max(5, Number(f.jobTimeoutMin.value) || 30),
       defaultStyle: f.defaultStyle.value,
       notifications: f.notifications.checked,
+      delivery: f.delivery.value,
     });
     toast('Settings saved.');
   };

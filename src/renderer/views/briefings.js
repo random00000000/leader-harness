@@ -94,7 +94,9 @@ export function mount(root, app, [briefingId]) {
     };
     if (key !== stageKey) {
       stageKey = key;
-      mountStage($('.stage', viewer), b, style, ctx);
+      // After a decision, reopen the report at that decision to show its outcome.
+      const focus = ctx.decisions.some((d) => d.id === app.ui.focusDecision) ? app.ui.focusDecision : null;
+      mountStage($('.stage', viewer), b, style, { ...ctx, focus });
     }
     if (!b.read) app.call('briefing:read', b.id);
   }

@@ -11,6 +11,7 @@ const DEFAULT_STATE = {
     maxConcurrent: 1,
     defaultStyle: 'dossier',
     notifications: true,
+    delivery: 'dispatch', // dispatch | windows | both
     paused: false,
     rateLimitedUntil: null,
     jobTimeoutMin: 30,

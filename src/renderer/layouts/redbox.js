@@ -1,6 +1,6 @@
 // Red Box: a leather despatch box that opens onto submission papers written in
 // the civil service format (Issue, Recommendation, Background, Handling).
-import { esc, fmtDate, STATUS, LEVEL, decisionState, decideButton } from './common.js';
+import { esc, fmtDate, STATUS, LEVEL, decisionState, decisionControls } from './common.js';
 
 export function render(b, ctx) {
   const recs = ctx.decisions.map((d) => ({ d, rec: d.options.find((o) => o.recommended) || d.options[0] }));
@@ -42,12 +42,11 @@ export function render(b, ctx) {
         .map((d) => {
           const st = decisionState(d);
           return `
-      <article class="paper slip ${st.open ? 'open' : 'closed'}">
+      <article class="paper slip ${st.open ? 'open' : 'closed'}" data-decision-block="${esc(d.id)}">
         <div class="slip-head">Decision slip</div>
         <h2>${esc(d.title)}</h2>
         <p>${esc(d.body)}</p>
-        <ul class="opts">${d.options.map((o) => `<li class="${o.recommended ? 'rec' : ''}"><b>${esc(o.label)}</b>${o.recommended ? '<span class="r">Recommended</span>' : ''}<br><small>${esc(o.detail)}</small></li>`).join('')}</ul>
-        <div class="act">${decideButton(d, 'Record decision')}</div>
+        ${decisionControls(d)}
       </article>`;
         })
         .join('')}
@@ -56,6 +55,7 @@ export function render(b, ctx) {
 }
 
 export const script = `
+if (document.querySelector('.slip.open') || window.LH_FOCUS) document.body.classList.add('opened');
 const box = document.querySelector('.box');
 const open = () => document.body.classList.add('opened');
 box.addEventListener('click', open);
@@ -95,13 +95,6 @@ ul, ol { margin: 0 0 10px; padding-left: 1.3em; }
 li { margin-bottom: 6px; }
 .slip { border-top: 8px solid var(--leather); }
 .slip-head { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--muted-ink); }
-.opts { list-style: none; padding: 0; display: grid; gap: 10px; }
-.opts li { border: 1px solid var(--rule); padding: 10px 14px; }
-.opts li.rec { border-color: var(--leather); background: var(--tint); }
-.opts .r { margin-left: 10px; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--leather); font-weight: 700; }
-.opts small { color: var(--muted-ink); }
-.act { display: flex; justify-content: flex-end; margin-top: 8px; }
-.decide { font-family: var(--font-display); background: var(--leather); color: var(--gold); border: 0; padding: 10px 22px; letter-spacing: .12em; text-transform: uppercase; font-size: 12px; cursor: pointer; border-radius: 2px; }
-.decide:hover { filter: brightness(1.15); }
-.decided { font-style: italic; color: var(--muted-ink); }
+:root { --decide-accent: var(--leather); --decide-on-accent: var(--gold); --decide-bg: var(--paper); --decide-line: var(--rule); --decide-field: var(--paper); --decide-danger: var(--leather); --decide-radius: 2px; }
+.slip .lh-opt.rec { background: var(--tint); }
 `;
