@@ -9,6 +9,14 @@
 ## How it works
 
 - An **Official** has a name, title, remit, optional project folder, authority, model, preferred style, a Briefing cadence, a work cadence and a decision window. It is appointed from the setup console (`#/appoint`), which has four templates: Project Lead, Chief of Staff, Director of Research and Head of Engineering.
+- **Isolated workspace** (`src/main/workspace.js`, roadmap item 4): when the project is a git repository, "Work in an isolated copy" is on by default.
+  - On appointment the app runs `git worktree add` into `<official home>/workspace` on a new branch `official/<name-slug>`, based on `origin/HEAD` (or the current branch). It falls back to a `git clone` if a worktree is refused.
+  - Every session runs in the workspace, never in the Leader's checkout. If the workspace is missing, the job fails rather than falling back (`workDirFor` in the scheduler).
+  - Before each session the workspace fetches from origin. The fetch runs asynchronously, and the job slot is reserved meanwhile.
+  - The wiki and the optional AGENTS.md mandate are written inside the workspace, so they reach the project through the Official's commits.
+  - Removing the Official removes the worktree, discarding uncommitted changes; the branch and its commits are kept.
+  - Commits need a git identity in the project (repo or global config). The worktree shares the repo's config.
+  - Verified 2026-09-25: a Build Official on a throwaway repo committed "Add hello" on `official/test-engineer`. The Leader's checkout stayed clean with `main` unchanged. 7 unit tests against a temp repo with a local bare remote.
 - **Wiki**: each Official gets a Karpathy-style wiki. If there is a project, it lives in the project root as `<Project> - Wiki/`, or reuses one that already exists. If there is no project, it lives in the Official's home folder in userData. An optional checkbox appends the wiki mandate to the project's AGENTS.md. The Official's ledger rows use the Model "Claude Code (Leader Harness: <name>)".
 - **Cadence**: `daily at HH:MM`, `interval N minutes` (at least 5) or `manual`. It is checked every 20 seconds. Each kind of job has at most one queued per Official, and one Official never runs two sessions at once.
 - **Session kinds**: briefing (structured output against the Briefing schema), work (picks the most valuable item from its wiki), directive (the Leader's instruction), and operation (one run of a surge).

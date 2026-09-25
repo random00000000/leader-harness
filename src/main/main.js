@@ -6,6 +6,7 @@ const path = require('path');
 const { Store, id } = require('./store');
 const { Scheduler, nextDue } = require('./scheduler');
 const { ensureWiki, installMandate, displayName } = require('./wiki');
+const { gitRoot, createWorkspace, removeWorkspace } = require('./workspace');
 const { findClaude } = require('./runner');
 const { AUTHORITY } = require('./prompts');
 const { welcomeBriefing } = require('./welcome');
@@ -169,10 +170,18 @@ function spawnOfficial(input) {
 
   const projectPath = input.projectPath?.trim() ? path.resolve(input.projectPath.trim()) : null;
   if (projectPath && !fs.existsSync(projectPath)) throw new Error(`Project folder not found: ${projectPath}`);
-  const wikiRoot = projectPath || homeDir;
+
+  // Git projects get an isolated workspace unless the Leader opts out: the
+  // Official edits its own worktree and delivers through pull requests.
+  let workspace = null;
+  const repoRoot = projectPath ? gitRoot(projectPath) : null;
+  if (repoRoot && input.isolate !== false) {
+    workspace = createWorkspace({ projectPath: repoRoot, dest: path.join(homeDir, 'workspace'), branch: `official/${slug(input.name)}` });
+  }
+  const workRoot = workspace?.path || projectPath || homeDir;
   const projectName = projectPath ? displayName(path.basename(projectPath)) : input.name;
-  const wiki = ensureWiki({ root: wikiRoot, projectName, description: input.remit });
-  if (projectPath && input.installMandate) installMandate(projectPath, wiki.projectName);
+  const wiki = ensureWiki({ root: workRoot, projectName, description: input.remit });
+  if (projectPath && input.installMandate) installMandate(workRoot, wiki.projectName);
 
   const official = {
     id: officialId,
@@ -180,6 +189,8 @@ function spawnOfficial(input) {
     title: input.title.trim(),
     remit: input.remit.trim(),
     projectPath,
+    repoRoot,
+    workspace, // { path, branch, base, method } or null
     homeDir,
     wikiDir: wiki.wikiDir,
     wikiCreated: wiki.created,
@@ -274,7 +285,18 @@ function registerIpc() {
     })
   );
   handle('official:dismiss', (officialId) => {
+    const leaving = store.get().officials.find((o) => o.id === officialId);
     for (const j of store.get().jobs.filter((x) => x.officialId === officialId && x.status === 'running')) scheduler.cancelJob(j.id);
+    if (leaving?.workspace) {
+      // After the cancelled session lets go of its files; the branch is kept.
+      setTimeout(() => {
+        try {
+          removeWorkspace({ projectPath: leaving.repoRoot, dest: leaving.workspace.path });
+        } catch (err) {
+          console.error('Could not remove workspace', err);
+        }
+      }, 3000);
+    }
     store.update((s) => {
       s.officials = s.officials.filter((o) => o.id !== officialId);
       for (const d of s.decisions) if (d.officialId === officialId && d.status === 'pending') d.status = 'withdrawn';

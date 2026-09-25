@@ -77,6 +77,7 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
     workCadence: { mode: 'manual' },
     decisionWindowMin: 240,
     installMandate: false,
+    isolate: true,
     ...values,
   };
   const auth = app.state.authority;
@@ -100,6 +101,7 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
             <div class="field"><span>Project folder (optional)</span>
               <div class="folder-pick"><input type="text" name="projectPath" value="${esc(v.projectPath)}" placeholder="No folder: the official works from their own wiki"><button type="button" class="btn" data-pick>Browse…</button></div>
               <small>The official works inside this folder. Its wiki is created here as "&lt;Project&gt; - Wiki" unless one already exists.</small></div>
+            <label class="check"><input type="checkbox" name="isolate" ${v.isolate ? 'checked' : ''}><span>Work in an isolated copy (recommended)<br><small class="faint">For git projects: the Official gets its own worktree and branch and delivers through pull requests. Your own checkout is never edited.</small></span></label>
             <label class="check"><input type="checkbox" name="installMandate" ${v.installMandate ? 'checked' : ''}><span>Also add the wiki rules to the project's AGENTS.md<br><small class="faint">Then your own Claude Code and Codex sessions keep the wiki up to date too.</small></span></label>
           </div>` : ''}
           <div class="step"><div class="step-title"><b>${creating ? '03' : '02'}</b>rhythm</div>
@@ -159,6 +161,7 @@ export function officialForm(root, app, values, { mode, onSubmit }) {
       remit: fd.get('remit') || '',
       projectPath: fd.get('projectPath') || '',
       installMandate: fd.get('installMandate') === 'on',
+      isolate: fd.get('isolate') === 'on',
       authority: fd.get('authority') || 'observe',
       model: fd.get('model') || '',
       style: fd.get('style') || '',

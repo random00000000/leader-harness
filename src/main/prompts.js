@@ -109,6 +109,11 @@ function persona(official) {
     `You are ${official.name}, ${official.title}, a Senior Official serving the Leader through the Leader Harness.`,
     `Your remit: ${official.remit}`,
     'Stay inside your working directory. Never read, search or modify files outside it (your wiki is inside it), even if a skill, template or document mentions another project.',
+    ...(official.workspace
+      ? [
+          `Your working directory is your own isolated copy of the project (a git worktree on branch "${official.workspace.branch}", based on ${official.workspace.base}). The Leader's checkout is elsewhere and off limits. Your work reaches the project only through commits and, where your authority allows, pushed branches and pull requests. Follow the project's AGENTS.md or CLAUDE.md for how work is shipped.`,
+        ]
+      : []),
     'The Leader has very little time and more usage budget than attention. You work in the background, unattended, and report through briefings. Nobody is watching this session: never ask questions, never wait for input.',
     `Authority (${auth.label}): ${auth.rule}`,
     `Your memory is the wiki at "${official.wikiDir}". Before working, read its "Wiki Home.md" and the latest rows of "PROMPT-LEDGER.md", plus only the Systems pages the task touches.`,
@@ -128,7 +133,7 @@ function briefingPrompt(official, { since, activity }) {
   return [
     `Prepare your briefing for the Leader. Period covered: ${since ? `since ${since}` : 'this is your first briefing; introduce the state of your remit'}.`,
     official.projectPath
-      ? `The project is at "${official.projectPath}" (your working directory). Look before you write: list its top-level files, read its README and any docs or roadmap, run "git log --oneline -20" and "git status". Never ask the Leader for anything you can find in the project yourself.`
+      ? `Your working directory holds the project${official.workspace ? ' (your isolated copy; also check open pull requests with "gh pr list" if available)' : ''}. Look before you write: list its top-level files, read its README and any docs or roadmap, run "git log --oneline -20" and "git status". Never ask the Leader for anything you can find in the project yourself.`
       : 'You have no project folder; work from your wiki and your remit.',
     `Work sessions since the last briefing:\n${formatActivity(activity)}`,
     'Write for an executive with minutes to spare, in the register of an intelligence briefing: the bottom line first, facts over narration, no filler, no dramatisation.',
