@@ -90,8 +90,10 @@ Requirements:
 git clone https://github.com/random00000000/leader-harness.git
 cd leader-harness
 npm install
-npm start
+npm run release
 ```
+
+`npm run release` builds a tested, versioned copy of the app and puts a **Leader Harness** shortcut in the repo folder. Open it from there. `npm run rollback` returns to the previous version if a release ever misbehaves. (`npm start` runs the development version from source.)
 
 A short setup briefing is waiting when the app opens. Then:
 1. Open **Officials** and choose **Appoint an Official**.

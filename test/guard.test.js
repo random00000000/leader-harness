@@ -82,9 +82,8 @@ test('Build may not push, merge, rebase or hard-reset, however it is written', (
   }
 });
 
-test('Ship may push and merge but never force-push', () => {
+test('Ship may push but never force-push', () => {
   assert.equal(bash('git push -u origin auto/3-guard', 'ship'), null);
-  assert.equal(bash('gh pr merge 3 --squash --delete-branch', 'ship'), null);
   for (const cmd of ['git push --force', 'git push -f origin main', 'git push --force-with-lease', 'git push origin +main', 'git push -uf origin x']) {
     assert.ok(bash(cmd, 'ship'), `blocks: ${cmd}`);
   }

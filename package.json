@@ -1,7 +1,7 @@
 {
   "name": "leader-harness",
   "productName": "Leader Harness",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An AI harness shaped for leaders: Senior Officials run Claude Code in the background and brief you.",
   "license": "MIT",
   "repository": "github:random00000000/leader-harness",
@@ -11,9 +11,32 @@
     "start": "electron .",
     "postinstall": "node scripts/postinstall.js",
     "check": "node scripts/check.mjs && npm test",
-    "test": "node --test \"test/*.test.js\""
+    "test": "node --test \"test/*.test.js\"",
+    "release": "node scripts/release.js",
+    "rollback": "node scripts/release.js --rollback"
   },
   "devDependencies": {
-    "electron": "^44.4.5"
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.random00000000.leaderharness",
+    "productName": "Leader Harness",
+    "files": [
+      "src/**",
+      "styles/**",
+      "resources/**",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "src/main/main.js"
+    },
+    "asarUnpack": [
+      "src/main/guard.js"
+    ],
+    "win": {
+      "target": "dir",
+      "icon": "resources/icon.png"
+    }
   }
 }

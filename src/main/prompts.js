@@ -1,48 +1,7 @@
-// Prompts, tool permissions and the Briefing schema used when a Senior
-// Official runs Claude Code headlessly.
-const path = require('path');
-
-// What an official may do without asking the Leader. Anything above its level
-// must be raised as a decision in the next briefing.
-// The rule text tells the official; `tools` (allowed) and `deny` (disallowed)
-// enforce it through Claude Code permissions. For Observe, Edit/Write are
-// scoped to the wiki folder at run time (see toolsFor).
-const GIT_READ = ['git log', 'git status', 'git diff', 'git show', 'git branch'].flatMap((c) => [`Bash(${c})`, `Bash(${c} *)`]);
-
-const AUTHORITY = {
-  observe: {
-    label: 'Observe',
-    summary: 'Reads the project and keeps its wiki. Changes no code.',
-    tools: ['Read', 'Glob', 'Grep', ...GIT_READ, 'WebSearch', 'WebFetch'],
-    wikiOnly: true,
-    deny: [],
-    rule: 'You may read anything, but you may only edit files inside your wiki folder. Do not change code, commit, or push.',
-  },
-  build: {
-    label: 'Build',
-    summary: 'Edits code, runs builds and tests, commits on a work branch.',
-    tools: ['Read', 'Glob', 'Grep', 'Edit', 'Write', 'NotebookEdit', 'Bash', 'WebSearch', 'WebFetch'],
-    deny: ['Bash(git push *)', 'Bash(git merge *)', 'Bash(git rebase *)', 'Bash(git reset --hard *)'],
-    rule: 'You may edit code, run builds and tests, and commit on a branch named leader/<topic>. Never push, merge, or rewrite history; raise those as decisions.',
-  },
-  ship: {
-    label: 'Ship',
-    summary: 'Full Senior Official authority: commit, push and merge.',
-    tools: ['Read', 'Glob', 'Grep', 'Edit', 'Write', 'NotebookEdit', 'Bash', 'WebFetch', 'WebSearch'],
-    deny: ['Bash(git push --force *)', 'Bash(git push -f *)', 'Bash(git push --force-with-lease *)'],
-    rule: 'You may commit, push, and merge. Never force-push, delete branches you did not create, or publish anything outside the repository without raising a decision first.',
-  },
-};
-
-// Permission rules for one run. Path rules are relative to the working
-// directory, which always contains the official's wiki.
-function toolsFor(official, cwd) {
-  const auth = AUTHORITY[official.authority] || AUTHORITY.observe;
-  if (!auth.wikiOnly) return { allow: auth.tools, deny: auth.deny };
-  const rel = path.relative(cwd, official.wikiDir).split(path.sep).join('/');
-  if (!rel || rel.startsWith('..')) throw new Error(`The wiki (${official.wikiDir}) must be inside the working directory (${cwd}).`);
-  return { allow: [...auth.tools, `Edit(${rel}/**)`, `Write(${rel}/**)`], deny: auth.deny };
-}
+// Prompts and the Briefing schema used when a Senior Official runs Claude
+// Code headlessly.
+// Authority rules live in authority.js, a protected file; re-exported here.
+const { AUTHORITY, toolsFor } = require('./authority');
 
 const BRIEFING_SCHEMA = {
   type: 'object',

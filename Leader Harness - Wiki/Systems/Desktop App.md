@@ -24,6 +24,25 @@ It builds on the decisions in [[Systems/PLAN - Leader Harness]]: a local desktop
 - The **Electron postinstall** is run explicitly by our own `scripts/postinstall.js`, because npm 11 skipped Electron's download step (FACT, observed 2026-09-24). It skips the download when `ELECTRON_SKIP_BINARY_DOWNLOAD` is set.
 - **CI**: `.github/workflows/check.yml` runs `npm ci` and `npm run check` on `windows-latest` with Node 22, for every pull request and every push to main. It skips the Electron binary, needs no secrets, and never calls Claude Code. Automation merges only after `gh pr checks` is green.
 
+## Releases
+
+Intent: "I would like the .exe to be close to the repo so I can use it easily" and "we do not land in a place where the harness destroys the harness" (2026-09-25). The design is in [[Systems/PLAN - Reliability]].
+
+- The Leader runs a **packaged build**, never the source tree: open `Leader Harness.lnk` in the repo folder. `npm start` is for development only.
+- `npm run release` (`scripts/release.js`) runs only from a clean `main` equal to `origin/main`. It:
+  1. runs `npm run check`;
+  2. builds with electron-builder (`--win --dir`, config in package.json `build`);
+  3. smoke-tests the packaged exe in capture mode against throwaway data (all 7 screens must render);
+  4. tags `v<version>` locally, then points the shortcut at the new build.
+
+  A build that fails its smoke test never becomes current.
+- `npm run release -- --dev` does the same from any branch without tagging, to test the release process itself.
+- `npm run rollback` points the shortcut at the previous version. The last 3 releases are kept.
+- Builds live in `%LOCALAPPDATA%\Programs\Leader Harness\releases\v<version>\win-unpacked\` (~370 MB each), outside the repo, because the repo sits in OneDrive. `current.txt` records the current version.
+- FACT (2026-09-25): a folder created directly under `%LOCALAPPDATA%` is unreadable to Chromium's sandboxed processes, so the packaged app crashed at startup ("GPU process isn't usable"). `%LOCALAPPDATA%\Programs`, the standard per-user install location, works. The smoke test caught this before the build became current.
+- `src/main/guard.js` is unpacked from the asar archive (`asarUnpack`), because the guard hook runs in an external Node process. `runner.js` points at `app.asar.unpacked`.
+- The version lives in package.json (semver; see [[Systems/PLAN - Reliability]]). `CHANGELOG.md` gets one line per merged pull request.
+
 ## Performance
 
 Intent: "we need to make it run super light weight because currently it feels like it sows my computer" (2026-09-25).
