@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "postinstall": "node node_modules/electron/install.js",
+    "postinstall": "node scripts/postinstall.js",
     "check": "node scripts/check.mjs && npm test",
     "test": "node --test \"test/*.test.js\""
   },

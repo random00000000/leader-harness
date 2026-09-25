@@ -24,7 +24,7 @@ Unattended sessions (routines and scheduled agents) work from `Leader Harness - 
   1. Branch from an up-to-date `main` as `auto/<item number>-<short-name>`.
   2. Commit, then push the branch.
   3. Run `gh pr create`. The PR body names the roadmap item and lists how it was verified.
-  4. Once `gh pr checks` passes (or, before CI exists, once your local checks pass), run `gh pr merge --squash --delete-branch`, then sync `main`.
+  4. Once `gh pr checks --watch` is green, run `gh pr merge --squash --delete-branch`, then sync `main`. Never merge a red or pending PR.
 - Never push to `main` directly, never force-push, and never rewrite published history.
 - Never change repository settings, visibility, secrets or collaborators, and never publish releases.
 - Never commit anything secret: tokens, `.env` files, user data, or `state.json`.
