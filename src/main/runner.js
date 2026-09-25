@@ -4,7 +4,19 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-function findClaude(configured) {
+// The lookup can shell out to `where`, and the UI asks on every state push,
+// so results are cached: found paths until the setting changes, misses for a minute.
+const lookupCache = new Map();
+
+function findClaude(configured = '') {
+  const hit = lookupCache.get(configured);
+  if (hit && (hit.path || Date.now() - hit.at < 60000)) return hit.path;
+  const found = lookupClaude(configured);
+  lookupCache.set(configured, { path: found, at: Date.now() });
+  return found;
+}
+
+function lookupClaude(configured) {
   if (configured && fs.existsSync(configured)) return configured;
   const candidates = [
     path.join(os.homedir(), '.local', 'bin', process.platform === 'win32' ? 'claude.exe' : 'claude'),
@@ -42,6 +54,12 @@ function runClaude({ claudePath, cwd, prompt, systemPrompt, tools, deny, model, 
 
   const started = Date.now();
   const child = spawn(claudePath, args, { cwd, windowsHide: true, env: { ...process.env } });
+  // Background work must never compete with what the Leader is doing.
+  try {
+    os.setPriority(child.pid, os.constants.priority.PRIORITY_BELOW_NORMAL);
+  } catch {
+    /* the process may already have exited */
+  }
   let stdout = '';
   let stderr = '';
   child.stdout.on('data', (d) => (stdout += d));

@@ -21,12 +21,12 @@ export function mount(root, app) {
     const week = totals(s.jobs, 7 * 86400000);
     const limited = s.settings.rateLimitedUntil && new Date(s.settings.rateLimitedUntil) > new Date();
     const jobs = [...s.jobs].sort((a, b) => (b.startedAt || b.createdAt).localeCompare(a.startedAt || a.createdAt)).slice(0, 150);
-    const name = (id) => app.officialById(id)?.name || 'Dismissed';
+    const name = (id) => app.officialById(id)?.name || 'Removed Official';
 
     root.innerHTML = `
       <div class="page">
-        <div class="page-head"><div><div class="eyebrow">Operations</div><h1>Activity</h1>
-          <p>Every background session your officials ran. The cost column is Claude Code's API-equivalent estimate. On a subscription, it tells you roughly how much of your usage window a session took.</p></div>
+        <div class="page-head"><div><div class="eyebrow">Operations log</div><h1>Activity</h1>
+          <p>Every background session your Officials ran. Cost is Claude Code's API-equivalent estimate; on a subscription it indicates how much of your usage window a session consumed.</p></div>
           <div class="actions">${s.settings.paused ? '<button class="btn primary" data-resume>Resume all work</button>' : '<button class="btn danger" data-pause>Pause all work</button>'}</div></div>
         ${limited ? `<div class="card" style="padding:14px 18px;margin-bottom:16px;border-color:rgba(224,166,74,.4)">
             <b style="color:var(--warn)">Usage limit reached.</b> <span class="muted">Work resumes ${esc(relTime(s.settings.rateLimitedUntil))}.</span>
@@ -45,7 +45,7 @@ export function mount(root, app) {
                 (j) => `<tr>
                   <td><b>${esc(j.title)}</b>${j.summary ? `<div class="sum">${esc(j.summary.slice(0, 500))}</div>` : ''}${j.error ? `<div class="sum err">${esc(j.error.slice(0, 400))}</div>` : ''}${j.permissionDenials ? `<div class="sum faint">${j.permissionDenials} action(s) blocked by authority level</div>` : ''}</td>
                   <td>${esc(name(j.officialId))}</td>
-                  <td><span class="pill ${j.status === 'done' ? 'ok' : j.status === 'failed' ? 'bad' : j.status === 'running' ? 'gold' : j.status === 'queued' ? 'warn' : ''}">${j.status === 'running' ? '<span class="dot ok pulse"></span>' : ''}${esc(j.status)}</span></td>
+                  <td><span class="pill ${j.status === 'done' ? 'ok' : j.status === 'failed' ? 'bad' : j.status === 'running' ? 'gold' : j.status === 'queued' ? 'warn' : ''}">${j.status === 'running' ? '<span class="dot ok"></span>' : ''}${esc(j.status)}</span></td>
                   <td class="num">${esc(relTime(j.finishedAt || j.startedAt || j.createdAt))}</td>
                   <td class="num">${j.status === 'running' ? esc(duration(Date.now() - new Date(j.startedAt).getTime())) : duration(j.durationMs)}</td>
                   <td class="num">${j.tokens ? compact(j.tokens) : '–'}</td>

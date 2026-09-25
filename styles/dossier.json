@@ -1,8 +1,8 @@
 {
   "id": "dossier",
   "order": 2,
-  "name": "Manila Dossier",
-  "description": "A typed file in a manila folder, stamped and paper-clipped.",
+  "name": "Dossier",
+  "description": "A typed memorandum in a file folder, with classification markings.",
   "layout": "dossier",
   "vars": {
     "--backdrop": "radial-gradient(circle at 30% 20%, #3b2f22, #1c1611 70%)",

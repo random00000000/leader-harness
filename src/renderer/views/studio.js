@@ -8,31 +8,31 @@ import { briefingContext } from './briefings.js';
 const SAMPLE = {
   id: 'brf_sample00',
   createdAt: new Date().toISOString(),
-  title: 'Campaign map reaches playable state',
+  title: 'Billing migration ready for cutover',
   classification: 'PRIORITY',
-  bluf: 'The campaign map now loads, scrolls and saves. One design call is needed on fog of war before the next push.',
+  bluf: 'The new billing system has passed parallel runs for five days. One decision is needed: the cutover window.',
   situation: [
-    'Map rendering was rebuilt on the new tile system; frame time dropped from 31 ms to 9 ms on the test save.',
-    'Save and load round-trip cleanly across three test campaigns.',
-    'Fog of war is stubbed: everything is visible. Two approaches are viable, with different costs.',
+    'Parallel runs matched the legacy system on 41,000 invoices; two rounding differences were traced and fixed.',
+    'Rollback has been rehearsed twice and takes under ten minutes.',
+    'Cutover needs a window with low invoice volume. Two options are viable.',
   ],
   actions: [
-    { text: 'Tile renderer merged to the work branch.', status: 'done' },
-    { text: 'Save format v2 with migration from v1.', status: 'done' },
-    { text: 'Fog of war design.', status: 'blocked' },
+    { text: 'Parallel-run reconciliation complete.', status: 'done' },
+    { text: 'Rollback procedure rehearsed.', status: 'done' },
+    { text: 'Cutover scheduling.', status: 'blocked' },
   ],
-  risks: [{ text: 'Save format v2 is not yet tested on large late-game campaigns.', level: 'medium' }],
-  next: ['Stress-test large saves.', 'Prototype whichever fog of war you choose.'],
+  risks: [{ text: 'Month-end volume makes a cutover after the 28th riskier.', level: 'medium' }],
+  next: ['Confirm the cutover window with finance.', 'Run the final reconciliation.'],
   decisions: [],
 };
 const SAMPLE_DECISION = {
   id: 'dec_sample00',
-  title: 'Fog of War',
-  body: 'The map is playable but every province is visible. We can hide the map per nation, which is cheap, or simulate line of sight per unit, which is richer and roughly three times the work.',
+  title: 'Billing cutover window',
+  body: 'The new billing system is ready. Cutting over this weekend avoids month-end volume; waiting a week allows one more full parallel run.',
   status: 'pending',
   options: [
-    { id: 'opt0', label: 'Per-nation fog', detail: 'Ship the cheap version this week.', recommended: true },
-    { id: 'opt1', label: 'Line of sight per unit', detail: 'Spend the next big push on it.', recommended: false },
+    { id: 'opt0', label: 'Cut over this weekend', detail: 'Saturday 06:00, with rollback on standby.', recommended: true },
+    { id: 'opt1', label: 'Wait one more week', detail: 'Run a further parallel cycle first.', recommended: false },
   ],
 };
 
@@ -45,7 +45,7 @@ export function mount(root, app) {
   const previewBriefing = () => {
     const real = [...app.state.briefings].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).find((b) => b.officialId);
     if (real) return { b: real, ctx: briefingContext(app, real) };
-    return { b: SAMPLE, ctx: { from: { name: 'Marshal Ardent', title: 'Minister for the Game' }, decisions: [SAMPLE_DECISION] } };
+    return { b: SAMPLE, ctx: { from: { name: 'Sarah Chen', title: 'Head of Engineering' }, decisions: [SAMPLE_DECISION] } };
   };
 
   function select(styleId) {

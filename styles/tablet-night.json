@@ -1,8 +1,8 @@
 {
   "id": "tablet-night",
   "order": 5,
-  "name": "Night Tablet",
-  "description": "The Daily Brief Tablet after dark. An example of a style built on another layout.",
+  "name": "Daily Brief (Night)",
+  "description": "The Daily Brief in a dark palette. An example of a style built on another layout.",
   "layout": "tablet",
   "vars": {
     "--backdrop": "#05070a",

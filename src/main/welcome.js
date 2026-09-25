@@ -11,12 +11,12 @@ function welcomeBriefing(s) {
     sample: true,
     officialId: null,
     briefingId,
-    title: 'The Cabinet Is Empty',
-    body: 'You have taken office, but nobody reports to you yet. A Senior Official needs a remit, a project, and a cadence. Once appointed, they will work in the background and brief you on schedule.',
+    title: 'No Officials appointed',
+    body: 'Nobody reports to you yet. An Official needs a remit, optionally a project, and a reporting schedule. Once appointed, they work in the background and brief you on that schedule.',
     options: [
-      { id: 'opt0', label: 'Appoint my first Senior Official', detail: 'Open the setup screen and spawn an official.', recommended: true, route: '#/spawn' },
-      { id: 'opt1', label: 'Try the other briefing styles first', detail: 'Open the Style Studio.', recommended: false, route: '#/studio' },
-      { id: 'opt2', label: 'Let me read the briefing first', detail: 'Close this event.', recommended: false, route: null },
+      { id: 'opt0', label: 'Appoint the first Official', detail: 'Open the setup screen.', recommended: true, route: '#/appoint' },
+      { id: 'opt1', label: 'Review briefing formats first', detail: 'Open the Style Studio.', recommended: false, route: '#/studio' },
+      { id: 'opt2', label: 'Read this briefing first', detail: 'Close this decision.', recommended: false, route: null },
     ],
     status: 'pending',
     createdAt: now,
@@ -26,31 +26,31 @@ function welcomeBriefing(s) {
   s.briefings.push({
     id: briefingId,
     officialId: null,
-    from: { name: 'The Harness', title: 'Chief of Staff' },
+    from: { name: 'Leader Harness', title: 'Setup' },
     createdAt: now,
     read: false,
-    title: 'Welcome to office',
+    title: 'Getting started',
     classification: 'PRIORITY',
-    bluf: 'Leader Harness runs your AI work while you are away and reports to you through briefings like this one. Appoint a Senior Official to get started.',
+    bluf: 'Leader Harness runs AI work in the background and reports to you in briefings like this one. Appoint an Official to begin.',
     situation: [
-      'Senior Officials are Claude Code agents with a remit. Each one owns an area, such as one of your games, and keeps a wiki as its memory.',
-      'Officials work on their own schedule: hourly, daily, or only when you order it. They spend your subscription usage while you are away from the keyboard.',
-      'You lead by reading briefings and answering events. Each event has a recommended option. If you do not answer in time, the recommendation is carried out, and Halt stops that line of work.',
-      'This briefing can be shown as a cabinet deck, a manila dossier, a red box, or a daily brief tablet. Switch styles above, or build your own in the Style Studio.',
+      'An Official is a Claude Code agent with a remit, such as delivery of one project. Each keeps a wiki as its working memory.',
+      'Officials work on a schedule you set (hourly, daily, or only on request) and use your Claude subscription while you are away.',
+      'You direct the work by reading briefings and answering decisions. Each decision carries a recommendation; if you do not respond in time, the recommendation proceeds. Halt stops that line of work.',
+      'Briefings can be read as a slide deck, a dossier, a red box submission, or a daily brief. Choose a format above, or create your own in the Style Studio.',
     ],
     actions: [
-      { text: 'Harness installed and scheduler running.', status: 'done' },
+      { text: 'Scheduler running.', status: 'done' },
       findClaude(s.settings.claudePath)
-        ? { text: 'Claude Code located on this machine.', status: 'done' }
+        ? { text: 'Claude Code found on this machine.', status: 'done' }
         : { text: 'Claude Code not found. Set its path in Settings.', status: 'blocked' },
-      { text: 'Appoint the first Senior Official.', status: 'in_progress' },
+      { text: 'Appoint the first Official.', status: 'in_progress' },
     ],
     risks: [
-      { text: 'Officials with Ship authority can commit, push and merge without asking. Start with Observe or Build until you trust them.', level: 'medium' },
-      { text: 'A big push can use a large share of your subscription window. Size it deliberately.', level: 'low' },
+      { text: 'Officials with Ship authority can commit, push and merge without asking. Start with Observe or Build.', level: 'medium' },
+      { text: 'A surge can consume a large share of your usage window. Size it deliberately.', level: 'low' },
     ],
     decisions: [decision.id],
-    next: ['Appoint an official from the Cabinet screen.', 'Choose how often they brief you.', 'Read their first briefing, usually a few minutes after appointment.'],
+    next: ['Appoint an Official from the Officials screen.', 'Set how often they report.', 'Read their first briefing, usually within a few minutes.'],
   });
 }
 

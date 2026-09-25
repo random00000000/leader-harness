@@ -8,10 +8,10 @@ import * as tablet from './layouts/tablet.js';
 import { BRIDGE_SCRIPT } from './layouts/common.js';
 
 export const LAYOUTS = {
-  deck: { name: 'Deck', module: deck },
+  deck: { name: 'Slide Deck', module: deck },
   dossier: { name: 'Dossier', module: dossier },
   redbox: { name: 'Red Box', module: redbox },
-  tablet: { name: 'Tablet', module: tablet },
+  tablet: { name: 'Daily Brief', module: tablet },
 };
 
 function varsCss(vars) {

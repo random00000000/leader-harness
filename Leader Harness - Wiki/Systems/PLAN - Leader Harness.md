@@ -19,7 +19,7 @@ HYPOTHESIS, not contested. The human did not correct it and answered the decisio
 1. **The bottleneck is attention, not tokens.** Current harnesses only turn tokens into work while a human sits at the prompt. The harness should turn spare tokens into results while the leader is away.
 2. **Flip the direction of work.** Agents push Briefings up; the leader reads and decides instead of prompting.
 3. **A chain of command replaces the chat window.** The leader delegates areas of responsibility to Senior Officials, not tasks.
-4. **Every decision is a bounded choice.** HOI4-style events turn "what should I prompt?" into "choose A, B or C".
+4. **Every decision is a bounded choice.** Decision requests turn "what should I prompt?" into "choose A, B or C". (The first version was modeled on Hearts of Iron events; that styling was retired on 2026-09-25 in favour of [[Systems/PATTERN - Voice And Tone]].)
 5. **How it feels matters.** The Briefing style is part of the product.
 6. **Setup is the only time it looks like Claude Code.** The console is for spawning Officials.
 7. **Not tied to one backend.** Claude Code comes first; others can follow.
@@ -30,7 +30,7 @@ HYPOTHESIS, not contested. The human did not correct it and answered the decisio
 - **D1. First job** (DECISION): being briefed. The Briefings and their styles are the day-one product. Pointing it at the human's projects comes second.
 - **D2. Where it runs** (DECISION): locally on the leader's machine, like Claude Code.
 - **D3. How the leader is reached** (DECISION): only on the PC for now. No phone or server.
-- **D4. Budget unit** (DECISION): subscription usage. It also needs a way to launch a deliberate **big push**, meaning a concentrated effort that spends a lot of quota on one goal.
+- **D4. Budget unit** (DECISION): subscription usage. It also needs a way to launch a deliberate **surge** (originally "big push"), meaning a concentrated effort that spends a lot of quota on one goal.
 - **D5. Senior Officials** (DECISION): the leader creates them freely. Example: an Official for one of the human's games that briefs on it and uses routines like Claude Code's to push work forward.
 - **D6. Work tracking** (DECISION): every project the harness handles gets a wiki in this Karpathy pattern. Work is tracked and managed there.
 - **D7. Authority** (DECISION): commit, push and merge are Senior Official authority. See the open question Q2 below.

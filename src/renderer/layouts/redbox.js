@@ -9,12 +9,12 @@ export function render(b, ctx) {
     <div class="box" role="button" tabindex="0" aria-label="Open the box">
       <div class="lid">
         <div class="emboss">
-          <svg viewBox="0 0 100 100" class="cipher" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="1"/><path d="M50 18 58 40 82 40 63 54 70 77 50 63 30 77 37 54 18 40 42 40Z" fill="currentColor"/></svg>
-          <div class="word">THE LEADER</div>
-          <div class="sub">${esc(ctx.from.title)}</div>
+          <div class="word">${esc(ctx.from.title)}</div>
+          <div class="rule"></div>
+          <div class="sub">For the Leader</div>
         </div>
         <div class="lock"></div>
-        <div class="hint">Click to open</div>
+        <div class="hint">Open</div>
       </div>
     </div>
     <div class="papers">
@@ -47,7 +47,7 @@ export function render(b, ctx) {
         <h2>${esc(d.title)}</h2>
         <p>${esc(d.body)}</p>
         <ul class="opts">${d.options.map((o) => `<li class="${o.recommended ? 'rec' : ''}"><b>${esc(o.label)}</b>${o.recommended ? '<span class="r">Recommended</span>' : ''}<br><small>${esc(o.detail)}</small></li>`).join('')}</ul>
-        <div class="act">${decideButton(d, 'Mark decision')}</div>
+        <div class="act">${decideButton(d, 'Record decision')}</div>
       </article>`;
         })
         .join('')}
@@ -69,8 +69,8 @@ html, body { margin: 0; min-height: 100%; background: var(--backdrop); color: va
 .box { width: min(720px, 100%); aspect-ratio: 1.75; perspective: 1400px; cursor: pointer; outline: none; transition: margin .6s ease, aspect-ratio .6s ease; }
 .lid { position: relative; height: 100%; border-radius: 10px; background: var(--leather); box-shadow: 0 30px 60px rgba(0,0,0,.55), inset 0 0 0 6px rgba(0,0,0,.18), inset 0 0 0 9px var(--gold-dim), inset 0 0 80px rgba(0,0,0,.35); display: grid; place-items: center; transform-origin: top center; transition: transform .7s cubic-bezier(.3,.7,.2,1), opacity .5s ease .2s; }
 .emboss { color: var(--gold); text-align: center; text-shadow: 0 1px 0 rgba(0,0,0,.4); }
-.cipher { width: 84px; height: 84px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.4)); }
-.word { font-family: var(--font-display); letter-spacing: .4em; font-size: 22px; margin-top: 14px; font-weight: 600; padding-left: .4em; }
+.word { font-family: var(--font-display); letter-spacing: .3em; font-size: 22px; font-weight: 600; padding-left: .3em; text-transform: uppercase; }
+.rule { width: 120px; height: 1px; background: var(--gold); opacity: .6; margin: 14px auto; }
 .sub { font-family: var(--font-display); letter-spacing: .25em; font-size: 11px; opacity: .8; margin-top: 6px; text-transform: uppercase; }
 .lock { position: absolute; bottom: 18px; left: 50%; width: 44px; height: 26px; margin-left: -22px; border-radius: 4px; background: linear-gradient(var(--gold), var(--gold-dim)); box-shadow: 0 2px 4px rgba(0,0,0,.4); }
 .lock::after { content: ''; position: absolute; left: 50%; top: 8px; width: 6px; height: 10px; margin-left: -3px; background: #3a2a10; border-radius: 3px; }

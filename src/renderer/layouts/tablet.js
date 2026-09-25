@@ -1,15 +1,13 @@
-// Daily Brief Tablet: a secure tablet showing the brief as an app, like a
-// presidential daily brief read on a device.
+// Daily Brief: the brief as it would be read on a secure tablet, in the
+// manner of a presidential daily brief.
 import { esc, fmtDate, STATUS, LEVEL, decisionState, decideButton } from './common.js';
 
 export function render(b, ctx) {
-  const date = new Date(b.createdAt);
   return `
   <div class="stand">
     <div class="device">
       <div class="camera"></div>
       <div class="screen">
-        <div class="statusbar"><span>${esc(date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }))}</span><span class="secure">&#9679; SECURE</span><span>100%</span></div>
         <header class="masthead">
           <div class="banner c-${esc(b.classification)}">${esc(b.classification)} // FOR THE LEADER ONLY</div>
           <div class="brand">The Leader's Daily Brief</div>
@@ -30,7 +28,7 @@ export function render(b, ctx) {
             <h2>${esc(d.title)}</h2>
             <p>${esc(d.body)}</p>
             <div class="chips">${d.options.map((o) => `<span class="${o.recommended ? 'rec' : ''}">${esc(o.label)}</span>`).join('')}</div>
-            <div class="row">${decideButton(d, 'Review & decide')}</div>
+            <div class="row">${decideButton(d, 'Review decision')}</div>
           </section>`;
             })
             .join('')}
@@ -40,7 +38,6 @@ export function render(b, ctx) {
           ${(b.next || []).length ? `<section class="card"><div class="label">Coming up</div>${b.next.map((x) => `<div class="line"><i class="dot"></i><span>${esc(x)}</span></div>`).join('')}</section>` : ''}
           <div class="end">End of brief</div>
         </main>
-        <nav class="tabbar"><span class="on">Brief</span><span>Decisions</span><span>Archive</span></nav>
       </div>
     </div>
   </div>`;
@@ -57,7 +54,7 @@ html, body { margin: 0; height: 100%; background: var(--backdrop); font-family: 
 .screen { position: relative; height: 100%; border-radius: 14px; overflow: hidden; background: var(--screen); color: var(--ink); display: flex; flex-direction: column; }
 .statusbar { display: flex; justify-content: space-between; padding: 8px 18px 4px; font-size: 11px; color: var(--muted); font-weight: 600; }
 .secure { color: var(--ok); letter-spacing: .1em; }
-.masthead { padding: 6px 26px 16px; border-bottom: 1px solid var(--line); }
+.masthead { padding: 18px 26px 16px; border-bottom: 1px solid var(--line); }
 .banner { font-size: 10px; letter-spacing: .22em; font-weight: 700; text-align: center; padding: 4px; border-radius: 3px; margin-bottom: 14px; color: #fff; background: var(--routine); }
 .banner.c-PRIORITY { background: var(--warn); } .banner.c-FLASH { background: var(--danger); }
 .brand { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -.01em; }

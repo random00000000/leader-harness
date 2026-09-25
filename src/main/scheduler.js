@@ -102,7 +102,7 @@ class Scheduler {
       if (!official || official.status !== 'active') continue;
       const inFlight = s.jobs.some((j) => j.operationId === op.id && (j.status === 'queued' || j.status === 'running'));
       if (!inFlight && op.completed < op.runs) {
-        this.enqueue(official, 'operation', { operationId: op.id, runNumber: op.completed + 1, title: `Big push ${op.completed + 1}/${op.runs}: ${op.objective.slice(0, 60)}` });
+        this.enqueue(official, 'operation', { operationId: op.id, runNumber: op.completed + 1, title: `Surge ${op.completed + 1}/${op.runs}: ${op.objective.slice(0, 60)}` });
       }
     }
 
@@ -156,7 +156,7 @@ class Scheduler {
       prompt = P.directivePrompt(official, job.directive);
     } else if (job.kind === 'operation') {
       const op = s.operations.find((o) => o.id === job.operationId);
-      if (!op || op.status !== 'active') return this.finish(job, { ok: false, error: 'The big push was cancelled.' }, 'cancelled');
+      if (!op || op.status !== 'active') return this.finish(job, { ok: false, error: 'The surge was cancelled.' }, 'cancelled');
       prompt = P.operationPrompt(official, op, job.runNumber);
     } else {
       prompt = P.workPrompt(official);
@@ -302,7 +302,7 @@ class Scheduler {
     );
     if (official) {
       this.enqueue(official, 'directive', {
-        title: `Order: ${choice.text ? choice.text.slice(0, 60) : option.label}`,
+        title: `Instruction: ${choice.text ? choice.text.slice(0, 60) : option.label}`,
         directive: { decisionId: d.id, decisionTitle: d.title, text },
       });
       this.pump();

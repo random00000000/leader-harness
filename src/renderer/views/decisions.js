@@ -1,27 +1,27 @@
 // Decisions: everything awaiting the Leader, plus a record of what was decided.
-import { $$, esc, emblem, relTime } from '../util.js';
+import { $$, esc, monogram, relTime } from '../util.js';
 
-const HOW = { decided: 'You decided', auto: 'Auto-decided', halted: 'Halted', withdrawn: 'Withdrawn' };
+const HOW = { decided: 'Decided', auto: 'Recommendation proceeded', halted: 'Work halted', withdrawn: 'Withdrawn' };
 
 export function mount(root, app) {
   function render() {
     const all = [...app.state.decisions].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const pending = all.filter((d) => d.status === 'pending');
     const past = all.filter((d) => d.status !== 'pending').slice(0, 40);
-    const fromOf = (d) => app.officialById(d.officialId) || { name: 'The Harness', title: 'Chief of Staff' };
+    const fromOf = (d) => app.officialById(d.officialId) || { name: 'Leader Harness', title: 'Setup' };
 
     root.innerHTML = `
       <div class="page">
-        <div class="page-head"><div><div class="eyebrow">Events</div><h1>Decisions</h1>
-          <p>If you don't answer before the timer runs out, the recommended option is carried out.</p></div></div>
+        <div class="page-head"><div><div class="eyebrow">Awaiting you</div><h1>Decisions</h1>
+          <p>If there is no response in time, the recommended option proceeds.</p></div></div>
         <div class="dec-list">
           ${pending
             .map((d) => {
               const o = fromOf(d);
               const rec = d.options.find((x) => x.recommended);
-              return `<div class="card dec">${emblem(o.name, 38)}
+              return `<div class="card dec">${monogram(o.name, 38)}
                 <div><h3>${esc(d.title)}</h3><p>${esc(d.body)}</p>
-                  <p style="margin-top:8px"><span class="pill gold">★ ${esc(rec?.label || '')}</span> <span class="faint" style="font-size:12px">${esc(o.name)} · ${d.deadlineAt ? `auto-decides ${esc(relTime(d.deadlineAt))}` : 'no deadline'}</span></p></div>
+                  <p style="margin-top:8px"><span class="pill gold">Recommended: ${esc(rec?.label || '')}</span> <span class="faint" style="font-size:12px">${esc(o.name)} · ${d.deadlineAt ? `recommendation proceeds ${esc(relTime(d.deadlineAt))}` : 'no deadline'}</span></p></div>
                 <button class="btn primary" data-open="${d.id}">Decide</button></div>`;
             })
             .join('') || '<div class="empty">Nothing needs your decision right now.</div>'}

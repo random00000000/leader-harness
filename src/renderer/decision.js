@@ -1,9 +1,9 @@
-// Hearts of Iron-style event popup for decisions. New pending decisions pop up
-// on their own; the Leader picks an option, writes their own order ("Other"),
-// halts the official's work, or defers ("Later").
-import { $, esc, emblem, relTime, toast } from './util.js';
+// Decision requests. New pending decisions open on their own as a short
+// decision memo; the Leader picks an option, sends a different instruction,
+// halts the Official's work, or decides later.
+import { $, esc, monogram, relTime, toast } from './util.js';
 
-export class EventModal {
+export class DecisionModal {
   constructor(app) {
     this.app = app;
     this.seen = new Set();
@@ -13,13 +13,13 @@ export class EventModal {
     this.primed = false;
   }
 
-  // Pop decisions that arrived since the app last looked.
+  // Open decisions that arrived since the app last looked.
   checkForNew() {
     const pending = this.app.state.decisions.filter((d) => d.status === 'pending');
     for (const d of pending) {
       if (this.seen.has(d.id)) continue;
       this.seen.add(d.id);
-      // On first load only the welcome sample pops; older decisions wait in the list.
+      // On first load only the welcome decision opens; older ones wait in the list.
       if (this.primed || d.sample) this.queue.push(d.id);
     }
     this.primed = true;
@@ -39,16 +39,13 @@ export class EventModal {
     this.render();
   }
 
-  // Re-render when state changes (e.g. auto-decided while open).
+  // Close when the decision is resolved elsewhere (e.g. its window expired).
   refresh() {
     if (!this.currentId) return;
     const d = this.app.state.decisions.find((x) => x.id === this.currentId);
-    if (!d || d.status !== 'pending') {
-      this.close();
-      return;
-    }
-    const timer = this.el?.querySelector('.timer-text');
-    if (timer && d.deadlineAt) timer.textContent = `Auto-decides ${relTime(d.deadlineAt)}`;
+    if (!d || d.status !== 'pending') return this.close();
+    const deadline = this.el?.querySelector('.deadline-text');
+    if (deadline && d.deadlineAt) deadline.textContent = deadlineText(d);
   }
 
   close() {
@@ -69,7 +66,7 @@ export class EventModal {
         return;
       }
       const o = this.app.officialById(d.officialId);
-      toast(choice.halt ? `${o?.name || 'Official'} halted. Resume from the Cabinet.` : `Order issued to ${o?.name || 'the official'}.`);
+      toast(choice.halt ? `${o?.name || 'Official'}: work halted. Resume from Officials.` : `Instruction sent to ${o?.name || 'the Official'}.`);
     } catch {
       /* toast already shown */
     }
@@ -80,36 +77,42 @@ export class EventModal {
     if (!d) return this.close();
     const o = this.app.officialById(d.officialId);
     const b = this.app.state.briefings.find((x) => x.id === d.briefingId);
-    const from = o || b?.from || { name: 'The Harness', title: 'Chief of Staff' };
+    const from = o || b?.from || { name: 'Leader Harness', title: 'Setup' };
 
     this.el?.remove();
     const el = document.createElement('div');
     el.className = 'scrim';
     el.innerHTML = `
-      <div class="event" role="dialog" aria-modal="true" aria-label="${esc(d.title)}">
-        <div class="event-title">${esc(d.title)}</div>
-        <div class="event-art">${emblem(from.name, 92)}<div class="from">${esc(from.name)} · ${esc(from.title)}</div></div>
-        <div class="event-body">${esc(d.body)}</div>
-        <div class="event-opts">
+      <div class="decision" role="dialog" aria-modal="true" aria-label="${esc(d.title)}">
+        <header class="decision-head">
+          <div class="eyebrow">Decision required</div>
+          <h2>${esc(d.title)}</h2>
+          <div class="decision-from">${monogram(from.name, 22)}<span>${esc(from.name)}, ${esc(from.title)}</span></div>
+        </header>
+        <p class="decision-body">${esc(d.body)}</p>
+        <div class="decision-opts">
           ${d.options
-            .map((opt) => `<button class="event-opt ${opt.recommended ? 'rec' : ''}" data-opt="${esc(opt.id)}"><b>${esc(opt.label)}</b><small>${esc(opt.detail)}</small></button>`)
+            .map(
+              (opt) => `<button class="decision-opt ${opt.recommended ? 'rec' : ''}" data-opt="${esc(opt.id)}">
+                ${opt.recommended ? '<span class="rec-tag">Recommended</span>' : ''}<b>${esc(opt.label)}</b><small>${esc(opt.detail)}</small></button>`
+            )
             .join('')}
           ${
             d.sample
               ? ''
-              : `<div class="event-other" hidden>
-                   <textarea placeholder="Write your own order. It goes to ${esc(from.name)} word for word."></textarea>
-                   <div class="row"><button class="btn primary sm" data-issue>Issue order</button><button class="btn ghost sm" data-cancel-other>Back</button></div>
+              : `<div class="decision-other" hidden>
+                   <textarea placeholder="Your instruction reaches ${esc(from.name)} exactly as written."></textarea>
+                   <div class="row"><button class="btn primary sm" data-send>Send instruction</button><button class="btn ghost sm" data-cancel-other>Cancel</button></div>
                  </div>
-                 <button class="event-opt" data-other><b>Other…</b><small>Give your own order instead.</small></button>`
+                 <button class="decision-opt quiet" data-other><b>Give a different instruction</b></button>`
           }
         </div>
-        <div class="event-foot">
-          ${d.deadlineAt ? `<span class="timer">⏳ <span class="timer-text">Auto-decides ${esc(relTime(d.deadlineAt))}</span></span>` : ''}
+        <footer class="decision-foot">
+          ${d.deadlineAt ? `<span class="deadline-text">${esc(deadlineText(d))}</span>` : ''}
           <span class="spacer"></span>
-          ${d.sample ? '' : `<button class="btn danger sm" data-halt title="Stop this official's work until you resume it">Halt work</button>`}
-          <button class="btn ghost sm" data-later>Later</button>
-        </div>
+          ${d.sample ? '' : `<button class="btn ghost sm danger-text" data-halt title="Stop this Official's work until you resume it">Halt work</button>`}
+          <button class="btn ghost sm" data-later>Decide later</button>
+        </footer>
       </div>`;
     $('#modal-root').appendChild(el);
     this.el = el;
@@ -117,7 +120,7 @@ export class EventModal {
     el.querySelectorAll('[data-opt]').forEach((btn) => (btn.onclick = () => this.choose({ optionId: btn.dataset.opt })));
     el.querySelector('[data-later]').onclick = () => this.close();
     el.querySelector('[data-halt]')?.addEventListener('click', () => this.choose({ halt: true }));
-    const other = el.querySelector('.event-other');
+    const other = el.querySelector('.decision-other');
     el.querySelector('[data-other]')?.addEventListener('click', (e) => {
       other.hidden = false;
       e.currentTarget.hidden = true;
@@ -127,15 +130,17 @@ export class EventModal {
       other.hidden = true;
       el.querySelector('[data-other]').hidden = false;
     });
-    el.querySelector('[data-issue]')?.addEventListener('click', () => {
+    el.querySelector('[data-send]')?.addEventListener('click', () => {
       const text = other.querySelector('textarea').value.trim();
       if (!text) return other.querySelector('textarea').focus();
       this.choose({ text });
     });
-    el.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') this.close();
-    });
+    el.addEventListener('keydown', (e) => e.key === 'Escape' && this.close());
     el.addEventListener('mousedown', (e) => e.target === el && this.close());
-    (el.querySelector('.event-opt.rec') || el.querySelector('.event-opt')).focus();
+    (el.querySelector('.decision-opt.rec') || el.querySelector('.decision-opt')).focus();
   }
+}
+
+function deadlineText(d) {
+  return `If there is no response, the recommendation proceeds ${relTime(d.deadlineAt)}.`;
 }

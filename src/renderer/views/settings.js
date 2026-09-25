@@ -20,7 +20,7 @@ export function mount(root, app) {
           .map((st) => `<option value="${esc(st.id)}" ${st.id === s.defaultStyle ? 'selected' : ''}>${esc(st.name)}</option>`)
           .join('')}</select></label>
         <label class="check"><input type="checkbox" name="notifications" ${s.notifications ? 'checked' : ''}><span>Windows notifications for new briefings and failures</span></label>
-        <div class="muted" style="font-size:12.5px;line-height:1.5">Closing the window keeps Leader Harness running in the system tray, so officials keep working. To stop it completely, use Quit in the tray menu.</div>
+        <div class="muted" style="font-size:12.5px;line-height:1.5">Closing the window keeps Leader Harness running in the system tray with minimal resources, so Officials keep working. To stop it completely, use Quit in the tray menu.</div>
         <div class="row" style="justify-content:flex-end"><button class="btn primary">Save settings</button></div>
       </form>
     </div>`;
