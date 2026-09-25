@@ -37,6 +37,7 @@ Intent: "I would like the .exe to be close to the repo so I can use it easily" a
 
   A build that fails its smoke test never becomes current.
 - `npm run release -- --dev` does the same from any branch without tagging, to test the release process itself.
+- The shortcut is also written to the Start menu (`%APPDATA%MicrosoftWindowsStart MenuProgramsLeader Harness.lnk`), so Windows search finds the app.
 - `npm run rollback` points the shortcut at the previous version. The last 3 releases are kept.
 - Builds live in `%LOCALAPPDATA%\Programs\Leader Harness\releases\v<version>\win-unpacked\` (~370 MB each), outside the repo, because the repo sits in OneDrive. `current.txt` records the current version.
 - FACT (2026-09-25): a folder created directly under `%LOCALAPPDATA%` is unreadable to Chromium's sandboxed processes, so the packaged app crashed at startup ("GPU process isn't usable"). `%LOCALAPPDATA%\Programs`, the standard per-user install location, works. The smoke test caught this before the build became current.

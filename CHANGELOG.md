@@ -2,6 +2,10 @@
 
 One line per merged pull request, newest first. Versions follow semver; releases are built with `npm run release`.
 
+## Unreleased
+
+- Releases also add a Leader Harness entry to the Start menu.
+
 ## 0.2.0
 
 - Versioned releases outside the source tree, with smoke test and rollback; the guard blocks pushes to main and gates merges of protected files; authority rules moved to `authority.js`. (Reliability R1, R3)
