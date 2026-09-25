@@ -54,15 +54,21 @@ function currentVersion() {
   }
 }
 
+// The same shortcut also goes into the Start menu, so Windows search finds it.
+const START_MENU_SHORTCUT = path.join(process.env.APPDATA || os.homedir(), 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Leader Harness.lnk');
+
 function pointShortcutAt(version) {
   const target = exePath(version);
-  const ps = `$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${SHORTCUT.replace(/'/g, "''")}');
-$s.TargetPath = '${target.replace(/'/g, "''")}';
-$s.WorkingDirectory = '${path.dirname(target).replace(/'/g, "''")}';
+  const q = (s) => s.replace(/'/g, "''");
+  for (const link of [SHORTCUT, START_MENU_SHORTCUT]) {
+    const ps = `$s = (New-Object -ComObject WScript.Shell).CreateShortcut('${q(link)}');
+$s.TargetPath = '${q(target)}';
+$s.WorkingDirectory = '${q(path.dirname(target))}';
 $s.Description = 'Leader Harness v${version}';
-$s.IconLocation = '${target.replace(/'/g, "''")},0';
+$s.IconLocation = '${q(target)},0';
 $s.Save()`;
-  sh('powershell', ['-NoProfile', '-NonInteractive', '-Command', ps]);
+    sh('powershell', ['-NoProfile', '-NonInteractive', '-Command', ps]);
+  }
   fs.writeFileSync(path.join(RELEASES, 'current.txt'), `${version}\n`);
 }
 
