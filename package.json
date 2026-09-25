@@ -10,7 +10,8 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "node node_modules/electron/install.js",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs && npm test",
+    "test": "node --test \"test/*.test.js\""
   },
   "devDependencies": {
     "electron": "^44.4.5"
