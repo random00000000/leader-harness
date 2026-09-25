@@ -2,7 +2,7 @@
   "id": "deck",
   "order": 1,
   "name": "Slide Deck",
-  "description": "One point per slide, for reading at a glance. Arrow keys to move.",
+  "description": "A briefing deck: one point per slide, running header, numbers on the cover. Arrow keys to move.",
   "layout": "deck",
   "vars": {
     "--backdrop": "#0e1117",
@@ -15,10 +15,11 @@
     "--ok": "#5ec28a",
     "--warn": "#e0a64a",
     "--danger": "#e5645a",
-    "--radius": "14px",
-    "--shadow": "0 30px 80px rgba(0,0,0,.5)",
+    "--radius": "8px",
+    "--shadow": "0 20px 50px rgba(0,0,0,.45)",
     "--font-body": "'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif",
-    "--font-display": "'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif"
+    "--font-display": "'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif",
+    "--faint": "#667085"
   },
   "css": ""
 }

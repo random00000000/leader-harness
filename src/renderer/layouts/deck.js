@@ -1,5 +1,8 @@
-// Slide Deck: a 16:9 slide presentation. Arrow keys, click, or dots to move.
-import { esc, fmtDate, STATUS, LEVEL, fromLine, decisionState, decisionControls } from './common.js';
+// Slide Deck: a 16:9 presentation, one point per slide. Every slide carries a
+// running header (briefing, classification, page) like a real briefing deck.
+// Order: cover with the numbers, bottom line, decisions, situation, actions
+// and risks, next. Arrow keys, click, or dots to move.
+import { esc, fmtDate, fromLine, decisionState, decisionControls, glance, fileRef, actionRows, riskRows } from './common.js';
 
 function chunk(list, n) {
   const out = [];
@@ -9,69 +12,66 @@ function chunk(list, n) {
 
 export function render(b, ctx) {
   const slides = [];
-  slides.push(`
-    <section class="slide title-slide">
+  const open = ctx.decisions.filter((d) => decisionState(d).open);
+
+  slides.push({
+    cls: 'cover',
+    body: `
       <div class="class-pill c-${esc(b.classification)}">${esc(b.classification)}</div>
       <h1>${esc(b.title)}</h1>
-      <p class="from">Briefing by ${fromLine(ctx)}</p>
-      <p class="date">${esc(fmtDate(b.createdAt))}</p>
-      ${(() => {
-        const open = ctx.decisions.filter((d) => decisionState(d).open);
-        return open.length ? `<button class="await" data-goto-decision="${esc(open[0].id)}">${open.length} decision${open.length > 1 ? 's' : ''} awaiting you: review now</button>` : '';
-      })()}
-    </section>`);
-  slides.push(`
-    <section class="slide bluf-slide">
-      <div class="kicker">Bottom line</div>
-      <p class="bluf">${esc(b.bluf)}</p>
-    </section>`);
-  chunk(b.situation || [], 4).forEach((part, i, all) =>
-    slides.push(`
-    <section class="slide">
-      <div class="kicker">Situation${all.length > 1 ? ` · ${i + 1}/${all.length}` : ''}</div>
-      <ol class="points" start="${i * 4 + 1}">${part.map((p) => `<li>${esc(p)}</li>`).join('')}</ol>
-    </section>`)
-  );
-  if ((b.actions || []).length || (b.risks || []).length) {
-    slides.push(`
-    <section class="slide two-col">
-      <div>
-        <div class="kicker">Actions</div>
-        <ul class="actions">${(b.actions || []).map((a) => `<li><span class="chip s-${esc(a.status)}">${esc(STATUS[a.status] || a.status)}</span>${esc(a.text)}</li>`).join('')}</ul>
-      </div>
-      <div>
-        <div class="kicker">Risks</div>
-        <ul class="risks">${(b.risks || []).map((r) => `<li><span class="chip r-${esc(r.level)}">${esc(LEVEL[r.level] || r.level)}</span>${esc(r.text)}</li>`).join('')}</ul>
-      </div>
-    </section>`);
-  }
+      <p class="from">${fromLine(ctx)} · ${esc(fmtDate(b.createdAt, { dateStyle: 'medium', timeStyle: 'short' }))}</p>
+      <div class="glance">${glance(b, ctx)
+        .map((g) => `<div class="${g.alert ? 'alert' : ''}"><b>${esc(g.value)}</b><span>${esc(g.label)}</span></div>`)
+        .join('')}</div>
+      ${open.length ? `<button class="await" data-goto-decision="${esc(open[0].id)}">Review ${open.length > 1 ? `${open.length} decisions` : 'the decision'} now &#8594;</button>` : ''}`,
+  });
+  slides.push({ label: 'Bottom line', cls: 'bluf-slide', body: `<p class="bluf">${esc(b.bluf)}</p>` });
   for (const d of ctx.decisions) {
     const st = decisionState(d);
-    slides.push(`
-    <section class="slide decision-slide ${st.open ? 'open' : 'closed'}" data-decision-block="${esc(d.id)}">
-      <div class="kicker">${st.open ? 'Decision required' : 'Decision'}</div>
-      <h2>${esc(d.title)}</h2>
-      <p class="body">${esc(d.body)}</p>
-      ${decisionControls(d)}
-    </section>`);
+    slides.push({
+      label: st.open ? 'Decision required' : 'Decision',
+      cls: `decision-slide ${st.open ? 'open' : 'closed'}`,
+      attrs: `data-decision-block="${esc(d.id)}"`,
+      body: `<h2>${esc(d.title)}</h2><p class="body">${esc(d.body)}</p>${decisionControls(d)}`,
+    });
+  }
+  chunk(b.situation || [], 4).forEach((part, i, all) =>
+    slides.push({
+      label: `Situation${all.length > 1 ? ` (${i + 1}/${all.length})` : ''}`,
+      body: `<ol class="points" start="${i * 4 + 1}">${part.map((p) => `<li>${esc(p)}</li>`).join('')}</ol>`,
+    })
+  );
+  if ((b.actions || []).length || (b.risks || []).length) {
+    slides.push({
+      label: 'Actions and risks',
+      cls: 'two-col',
+      body: `
+        <div><h3>Actions</h3><table class="rows">${actionRows(b) || '<tr><td>None reported.</td></tr>'}</table></div>
+        <div><h3>Risks</h3><table class="rows">${riskRows(b) || '<tr><td>None reported.</td></tr>'}</table></div>`,
+    });
   }
   if ((b.next || []).length) {
-    slides.push(`
-    <section class="slide">
-      <div class="kicker">Next</div>
-      <ul class="points next">${b.next.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
-    </section>`);
+    slides.push({ label: 'Next', body: `<ul class="points next">${b.next.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` });
   }
 
+  const total = slides.length;
   return `
   <div class="deck">
-    <div class="viewport">${slides.map((s, i) => s.replace('<section class="slide', `<section data-i="${i}" class="slide`)).join('')}</div>
-    <footer class="nav">
+    <div class="viewport">${slides
+      .map(
+        (s, i) => `<section data-i="${i}" class="slide ${s.cls || ''}" ${s.attrs || ''}>
+          <header class="run"><span>${esc(s.label || 'Briefing')} · <em>${esc(b.title)}</em></span><span>${esc(b.classification)} · ${i + 1}/${total}</span></header>
+          <div class="content">${s.body}</div>
+          <footer class="foot"><span>${esc(ctx.from.name)}</span><span>${esc(fileRef(b))}</span></footer>
+        </section>`
+      )
+      .join('')}</div>
+    <nav class="nav">
       <button class="prev" aria-label="Previous slide">&#8249;</button>
-      <div class="dots">${slides.map((_, i) => `<i data-go="${i}"></i>`).join('')}</div>
+      <div class="dots">${slides.map((s, i) => `<i data-go="${i}" class="${s.attrs ? 'dec' : ''}" title="${esc(s.label || 'Cover')}"></i>`).join('')}</div>
       <span class="count"></span>
       <button class="next" aria-label="Next slide">&#8250;</button>
-    </footer>
+    </nav>
     <div class="progress"><span></span></div>
   </div>`;
 }
@@ -106,44 +106,52 @@ export const css = `
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--backdrop); color: var(--ink); font-family: var(--font-body); overflow: hidden; }
 .deck { position: absolute; inset: 0; display: flex; flex-direction: column; }
-.viewport { flex: 1; position: relative; display: grid; place-items: center; padding: 28px 28px 8px; }
+.viewport { flex: 1; position: relative; display: grid; place-items: center; padding: 22px 24px 6px; }
 .slide {
-  position: absolute; width: min(calc(100% - 56px), calc((100vh - 110px) * 16 / 9)); aspect-ratio: 16 / 9;
-  background: var(--slide); border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 5.5% 7%; display: flex; flex-direction: column; justify-content: center; gap: 1.2em;
-  opacity: 0; transform: translateX(24px) scale(.985); transition: opacity .35s ease, transform .35s ease; pointer-events: none;
-  font-size: clamp(12px, 1.55vw, 22px); overflow: hidden;
+  position: absolute; width: min(calc(100% - 48px), calc((100vh - 96px) * 16 / 9)); aspect-ratio: 16 / 9;
+  background: var(--slide); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--line);
+  display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;
+  opacity: 0; transition: opacity .25s ease; pointer-events: none; font-size: clamp(13px, 1.65vw, 22px);
 }
-.slide::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--accent); }
-.slide.active { opacity: 1; transform: none; pointer-events: auto; }
-.decision-slide { justify-content: flex-start; overflow-y: auto; font-size: clamp(11px, 1.25vw, 18px); }
-.await { align-self: flex-start; font: inherit; font-size: .8em; font-weight: 600; margin-top: .6em; padding: .55em 1.1em; border-radius: 99px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
-.await:hover { background: var(--accent); color: var(--slide); }
-:root { --decide-accent: var(--accent); --decide-on-accent: var(--slide); --decide-bg: var(--chip); --decide-line: var(--line); --decide-field: var(--backdrop); --decide-danger: var(--danger); --decide-radius: calc(var(--radius) / 2); }
-.kicker { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .18em; font-size: .72em; color: var(--accent); font-weight: 600; }
-h1 { font-family: var(--font-display); font-size: 2.6em; line-height: 1.08; margin: 0; font-weight: 700; letter-spacing: -.01em; }
-h2 { font-family: var(--font-display); font-size: 1.8em; margin: 0; line-height: 1.15; }
-.from { margin: 0; color: var(--muted); font-size: 1.05em; }
-.date { margin: 0; color: var(--muted); font-size: .85em; }
-.class-pill { align-self: flex-start; font-family: var(--font-display); font-size: .7em; letter-spacing: .2em; padding: .35em .9em; border-radius: 99px; border: 1px solid currentColor; }
-.c-ROUTINE { color: var(--muted); } .c-PRIORITY { color: var(--warn); } .c-FLASH { color: var(--danger); }
-.bluf { font-size: 2em; line-height: 1.3; margin: 0; font-weight: 500; }
-.points { margin: 0; padding-left: 1.4em; display: grid; gap: .8em; line-height: 1.45; }
+.slide.active { opacity: 1; pointer-events: auto; }
+.run, .foot { display: flex; justify-content: space-between; gap: 1em; padding: .7em 2.2em; font-size: .62em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.run { border-bottom: 1px solid var(--line); }
+.run em { font-style: normal; color: var(--faint); text-transform: none; letter-spacing: 0; }
+.foot { border-top: 1px solid var(--line); color: var(--faint); }
+.content { padding: 1.4em 2.2em; display: flex; flex-direction: column; justify-content: center; gap: 1em; min-height: 0; overflow-y: auto; }
+.cover .content { justify-content: center; gap: .9em; }
+.class-pill { align-self: flex-start; font-size: .62em; font-weight: 700; letter-spacing: .2em; padding: .3em .8em; border-radius: 3px; color: var(--slide); }
+.c-ROUTINE { background: var(--ok); } .c-PRIORITY { background: var(--warn); } .c-FLASH { background: var(--danger); }
+h1 { font-family: var(--font-display); font-size: 2.3em; line-height: 1.1; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+h2 { font-family: var(--font-display); font-size: 1.55em; margin: 0; line-height: 1.2; }
+h3 { font-size: .7em; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin: 0 0 .6em; }
+.from { margin: 0; color: var(--muted); font-size: .85em; }
+.glance { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6em; margin-top: .6em; }
+.glance div { background: var(--chip); border-radius: calc(var(--radius) / 2); padding: .6em .8em; display: grid; gap: .1em; border-left: 3px solid var(--line); }
+.glance b { font-size: 1.5em; line-height: 1; font-variant-numeric: tabular-nums; }
+.glance span { font-size: .6em; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.glance .alert { border-left-color: var(--accent); }
+.glance .alert b { color: var(--accent); }
+.await { align-self: flex-start; font: inherit; font-size: .75em; font-weight: 600; margin-top: .4em; padding: .55em 1.1em; border-radius: 4px; border: 0; background: var(--accent); color: var(--slide); cursor: pointer; }
+.bluf { font-size: 1.75em; line-height: 1.3; margin: 0; font-weight: 500; max-width: 38ch; }
+.points { margin: 0; padding-left: 1.4em; display: grid; gap: .7em; line-height: 1.45; }
 .points li::marker { color: var(--accent); font-weight: 700; }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5em; align-content: center; }
-.two-col > div { display: flex; flex-direction: column; gap: 1em; }
-.actions, .risks { list-style: none; margin: 0; padding: 0; display: grid; gap: .75em; line-height: 1.4; }
-.actions li, .risks li { display: flex; gap: .7em; align-items: baseline; }
-.chip { flex: none; font-size: .62em; text-transform: uppercase; letter-spacing: .1em; padding: .3em .6em; border-radius: 4px; background: var(--chip); font-weight: 600; }
-.s-done, .r-low { color: var(--ok); } .s-in_progress, .r-medium { color: var(--warn); } .s-blocked, .r-high { color: var(--danger); }
-.body { margin: 0; line-height: 1.5; color: var(--muted); max-width: 60ch; }
-.nav { display: flex; align-items: center; justify-content: center; gap: 16px; height: 52px; color: var(--muted); font-size: 13px; }
-.nav button { background: none; border: 1px solid var(--line); color: var(--ink); width: 34px; height: 34px; border-radius: 50%; font-size: 20px; line-height: 1; cursor: pointer; }
+.two-col .content { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; align-content: start; padding-top: 2em; }
+.rows { width: 100%; border-collapse: collapse; font-size: .9em; }
+.rows td { padding: .45em .5em; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.35; }
+.rows .st { width: 7.5em; font-size: .78em; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.s-done .st, .r-low .st { color: var(--ok); } .s-in_progress .st, .r-medium .st { color: var(--warn); } .s-blocked .st, .r-high .st { color: var(--danger); }
+.decision-slide .content { justify-content: flex-start; font-size: .9em; }
+.decision-slide .body { margin: 0; line-height: 1.45; color: var(--muted); max-width: 70ch; }
+.nav { display: flex; align-items: center; justify-content: center; gap: 14px; height: 48px; color: var(--muted); font-size: 13px; }
+.nav button { background: none; border: 1px solid var(--line); color: var(--ink); width: 32px; height: 32px; border-radius: 50%; font-size: 19px; line-height: 1; cursor: pointer; }
 .nav button:hover { border-color: var(--accent); color: var(--accent); }
 .dots { display: flex; gap: 7px; }
-.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); cursor: pointer; transition: all .2s; }
-.dots i.on { background: var(--accent); width: 20px; border-radius: 4px; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); cursor: pointer; }
+.dots i.dec { background: var(--accent); opacity: .55; }
+.dots i.on { background: var(--ink); width: 18px; border-radius: 4px; opacity: 1; }
 .count { min-width: 48px; text-align: center; font-variant-numeric: tabular-nums; }
-.progress { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-.progress span { display: block; height: 100%; background: var(--accent); transition: width .35s ease; }
+.progress { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.progress span { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+:root { --decide-accent: var(--accent); --decide-on-accent: var(--slide); --decide-bg: var(--chip); --decide-line: var(--line); --decide-field: var(--backdrop); --decide-danger: var(--danger); --decide-radius: 4px; }
 `;

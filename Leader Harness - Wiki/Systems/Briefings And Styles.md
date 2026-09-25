@@ -16,11 +16,15 @@
 - **Layout vs style**:
   - A *layout* (`src/renderer/layouts/`: deck, dossier, redbox, tablet) turns the schema into HTML plus its structural CSS.
   - A *style* (`styles/*.json` built in, or `userData/styles/*.json` custom) picks a layout and supplies CSS variables and extra CSS. With `replaceLayoutCss`, it replaces the layout's CSS entirely.
+- **Utilitarian layout rules** (2026-09-25, from "polish the reports to be more utilitarian. the folder should look more like a folder and each style should be more polished"):
+  - Every format follows the same reading order: bottom line → decisions → situation → actions → risks → next.
+  - Each opens with an at-a-glance strip (`glance()`: decisions pending, actions done/total, blocked, high risks) and carries a filing reference (`fileRef()`, e.g. LH-2509-4F2A).
+  - Actions and risks render as status tables (`actionRows()`, `riskRows()`; risks sorted high first). All three helpers are in `layouts/common.js`.
 - **Built-in styles**:
-  - Slide Deck: 16:9 slides with arrow keys and dots.
-  - Dossier: a typed memorandum in a file folder, with classification banners at the top and bottom, and decision minutes with checkboxes.
-  - Red Box: a leather box that opens onto civil-service submissions (Issue / Recommendation / Background / Handling) and decision slips.
-  - Daily Brief: a tablet frame with feed cards (no fake status or tab bars).
+  - Slide Deck: 16:9 slides with a running header (section, briefing, classification, page) and footer (Official, reference). The cover carries the numbers and a "Review the decision now" jump. Decision slides are marked in the dot navigation.
+  - Dossier: a manila file folder (labelled tab with the reference and a classification flag, a crease, a darker lower edge) holding a memorandum on a two-prong fastener, with two sheets peeking out behind. The memo header is a table (From, To, Date, Subject, Ref), and classification banners run at the top and bottom of the page.
+  - Red Box: a stitched leather despatch box with gold tooling and a brass lock. It opens onto a Whitehall-style submission using UK markings (OFFICIAL, OFFICIAL-SENSITIVE, SECRET), a header table, then Issue, Recommendation ("That you agree to…", decided in place), Background, Progress and Handling.
+  - Daily Brief: a tablet frame. The masthead holds the numbers, followed by the top line, then decision cards, the situation as one numbered list, and actions and risks side by side as tables.
   - Daily Brief (Night): an example of a style built on another style's layout.
 - **Rendering**: a sandboxed iframe (`allow-scripts`, not same-origin) with a strict CSP. Custom CSS cannot reach the app or load remote resources. Decision buttons use `postMessage` to open the decision request.
 - **Style Studio** (`#/studio`): pick a style, then edit its variables (colour pickers), layout and CSS with a live preview. Saving a built-in style creates a copy. "Load the full layout CSS" gives complete control. Any style can be made the default. The style can also be switched per Briefing in the Briefing Room.

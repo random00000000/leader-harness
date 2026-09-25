@@ -14,6 +14,38 @@ export function fromLine(ctx) {
   return `${esc(ctx.from.name)}, ${esc(ctx.from.title)}`;
 }
 
+// The numbers a busy reader wants first. Layouts render them as an
+// "at a glance" strip in their own look.
+export function glance(b, ctx) {
+  const actions = b.actions || [];
+  const risks = b.risks || [];
+  return [
+    { key: 'decisions', label: 'Decisions pending', value: ctx.decisions.filter((d) => d.status === 'pending').length, alert: ctx.decisions.some((d) => d.status === 'pending') },
+    { key: 'actions', label: 'Actions done', value: `${actions.filter((a) => a.status === 'done').length}/${actions.length}` },
+    { key: 'blocked', label: 'Blocked', value: actions.filter((a) => a.status === 'blocked').length, alert: actions.some((a) => a.status === 'blocked') },
+    { key: 'risks', label: 'High risks', value: risks.filter((r) => r.level === 'high').length, alert: risks.some((r) => r.level === 'high') },
+  ];
+}
+
+// A short reference for filing, stable per briefing: "LH-2609-4F2A".
+export function fileRef(b) {
+  const d = new Date(b.createdAt);
+  const tail = String(b.id || '').replace(/[^a-z0-9]/gi, '').slice(-4).toUpperCase();
+  return `LH-${String(d.getDate()).padStart(2, '0')}${String(d.getMonth() + 1).padStart(2, '0')}-${tail}`;
+}
+
+// Actions and risks as compact tables (status column first, then the text).
+export function actionRows(b) {
+  return (b.actions || []).map((a) => `<tr class="s-${esc(a.status)}"><td class="st">${esc(STATUS[a.status] || a.status)}</td><td>${esc(a.text)}</td></tr>`).join('');
+}
+export function riskRows(b) {
+  const order = { high: 0, medium: 1, low: 2 };
+  return [...(b.risks || [])]
+    .sort((x, y) => (order[x.level] ?? 3) - (order[y.level] ?? 3))
+    .map((r) => `<tr class="r-${esc(r.level)}"><td class="st">${esc(LEVEL[r.level] || r.level)}</td><td>${esc(r.text)}</td></tr>`)
+    .join('');
+}
+
 // Decision state as shown inside a briefing.
 export function decisionState(d) {
   if (d.status === 'pending') return { open: true, label: 'Awaiting decision' };

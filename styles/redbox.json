@@ -2,11 +2,11 @@
   "id": "redbox",
   "order": 3,
   "name": "Red Box",
-  "description": "Civil service submissions in a despatch box: issue, recommendation, background.",
+  "description": "A leather despatch box holding a civil-service submission: issue, recommendation, background, handling.",
   "layout": "redbox",
   "vars": {
     "--backdrop": "radial-gradient(ellipse at 50% 0%, #2b2320, #121010 70%)",
-    "--leather": "#8e1b1b",
+    "--leather": "#8b1a1a",
     "--gold": "#e2c071",
     "--gold-dim": "#9c7d3a",
     "--paper": "#fbf8f1",
@@ -16,7 +16,11 @@
     "--muted-ink": "#6d655d",
     "--rule": "#d9d1c4",
     "--font-body": "Georgia, 'Times New Roman', serif",
-    "--font-display": "'Palatino Linotype', Palatino, Georgia, serif"
+    "--font-display": "'Palatino Linotype', Palatino, Georgia, serif",
+    "--leather-light": "#a62a26",
+    "--leather-dark": "#5e0f10",
+    "--ok": "#2f6b3f",
+    "--warn": "#9a6412"
   },
   "css": ""
 }
