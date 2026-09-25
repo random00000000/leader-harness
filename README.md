@@ -8,7 +8,7 @@
 
 AI agents that work while you are away and report to you like a well-run staff.
 
-<img src="docs/screenshots/briefing-dossier.png" alt="A briefing shown as a typed dossier with classification markings" width="900">
+<img src="docs/screenshots/briefing-dossier.png" alt="A briefing in the Dossier format: a manila file folder with a labelled tab, a fastened memorandum, an at-a-glance strip and the decision right after the summary" width="900">
 
 </div>
 
@@ -34,12 +34,12 @@ flowchart TD
 
 ## Briefings in the format you read best
 
-Every briefing has the same content: the bottom line, the situation, the actions taken, the risks, and the decisions needed. You choose how it's presented.
+Every briefing has the same content, in the same order in every format: the bottom line, the decisions needed, the situation, actions and risks as short tables, and what comes next. An at-a-glance strip at the top counts pending decisions, actions done, blocked items and high risks. You choose how it's presented.
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/briefing-deck.png" alt="Slide Deck format"><br><b>Slide Deck:</b> one point per slide, for reading at a glance.</td>
-    <td width="50%"><img src="docs/screenshots/briefing-redbox.png" alt="Red Box format"><br><b>Red Box:</b> civil service submissions: issue, recommendation, background.</td>
+    <td width="50%"><img src="docs/screenshots/briefing-deck.png" alt="Slide Deck format"><br><b>Slide Deck:</b> one point per slide, with the numbers on the cover.</td>
+    <td width="50%"><img src="docs/screenshots/briefing-redbox.png" alt="Red Box format"><br><b>Red Box:</b> a despatch box holding a Whitehall-style submission.</td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/briefing-daily.png" alt="Daily Brief format"><br><b>Daily Brief:</b> the brief as read on a secure tablet.</td>
@@ -57,7 +57,7 @@ When an Official reports, the **Dispatch** panel appears quietly in the corner o
 
 Decide wherever you are reading: in Dispatch, or inside the briefing itself, in any format.
 
-<img src="docs/screenshots/decision-in-report.png" alt="A decision minute inside the Dossier format, with an option selected and a Confirm decision button" width="900">
+<img src="docs/screenshots/decision-in-report.png" alt="A decision slide in the Slide Deck format with three options, one recommended, and the response window" width="900">
 
 Each decision states the situation and gives you:
 - **A few concrete options**, one of them recommended by the Official. Pick one, then confirm.

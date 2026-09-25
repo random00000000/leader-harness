@@ -2,6 +2,10 @@
 
 One line per merged pull request, newest first. Versions follow semver; releases are built with `npm run release`.
 
+## 0.4.0
+
+- Utilitarian reports: every format reads bottom line, decisions, situation, actions, risks, next; an at-a-glance strip; status tables; a filing reference. The Dossier is now a proper file folder, and the deck, red box and daily brief are polished to match.
+
 ## 0.3.0
 
 - Decide inside every briefing format: pick and confirm, give a different instruction, or halt, without leaving the report.
