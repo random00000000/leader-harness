@@ -1,5 +1,5 @@
 // Runs one headless Claude Code session (`claude -p`) and parses its JSON result.
-const { spawn, execFileSync } = require('child_process');
+const { spawn, spawnSync, execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -32,6 +32,51 @@ function lookupClaude(configured) {
   }
 }
 
+// ---- workspace guard ----------------------------------------------------
+
+const GUARD_SCRIPT = path.join(__dirname, 'guard.js');
+let guardNode; // cached: { node } or { error }
+
+// The guard hook runs under Node.js. Inside Electron, process.execPath is the
+// Electron binary, so we look for a real node on PATH.
+function findNode() {
+  if (!process.versions.electron) return process.execPath;
+  try {
+    const out = execFileSync(process.platform === 'win32' ? 'where' : 'which', ['node'], { encoding: 'utf8' });
+    return out.split(/\r?\n/).find(Boolean) || null;
+  } catch {
+    return null;
+  }
+}
+
+// Confirms the guard actually allows and blocks before any session relies on
+// it. Without a working guard no session starts: it fails closed.
+function guardPreflight() {
+  if (guardNode) return guardNode;
+  const node = findNode();
+  if (!node) return (guardNode = { error: 'The workspace guard needs Node.js on PATH. Install Node.js, then try again.' });
+  const run = (command) =>
+    spawnSync(node, [GUARD_SCRIPT], {
+      input: JSON.stringify({ tool_name: 'Bash', tool_input: { command } }),
+      env: { ...process.env, LH_GUARD_ROOT: os.tmpdir(), LH_GUARD_AUTHORITY: 'build' },
+      encoding: 'utf8',
+      windowsHide: true,
+    });
+  const allowed = run('git status');
+  const blocked = run('git push');
+  if (allowed.status !== 0 || blocked.status !== 2) {
+    return (guardNode = { error: `The workspace guard failed its self-test (exit ${allowed.status}/${blocked.status}).` });
+  }
+  return (guardNode = { node });
+}
+
+function guardSettings(node) {
+  const command = `"${node}" "${GUARD_SCRIPT}"`;
+  return JSON.stringify({
+    hooks: { PreToolUse: [{ matcher: 'Read|Edit|MultiEdit|Write|NotebookEdit|Glob|Grep|Bash|PowerShell', hooks: [{ type: 'command', command }] }] },
+  });
+}
+
 // Usage-limit messages look like "Claude AI usage limit reached|1760000000"
 // or "You've hit your limit · resets 3pm".
 function detectRateLimit(text) {
@@ -44,8 +89,12 @@ function detectRateLimit(text) {
 /**
  * @returns {{ child, done: Promise<{ok, result, structured, costUsd, usage, durationMs, error, rateLimitedUntil, stderr}>}}
  */
-function runClaude({ claudePath, cwd, prompt, systemPrompt, tools, deny, model, schema, timeoutMin = 30 }) {
+function runClaude({ claudePath, cwd, prompt, systemPrompt, tools, deny, model, schema, authority, timeoutMin = 30 }) {
+  const guard = guardPreflight();
+  if (guard.error) return { child: null, done: Promise.resolve({ ok: false, error: guard.error, durationMs: 0 }) };
+
   const args = ['-p', '--output-format', 'json', '--no-session-persistence', '--permission-mode', 'dontAsk'];
+  args.push('--settings', guardSettings(guard.node));
   if (systemPrompt) args.push('--append-system-prompt', systemPrompt);
   if (tools?.length) args.push('--allowedTools', tools.join(','));
   if (deny?.length) args.push('--disallowedTools', deny.join(','));
@@ -53,7 +102,8 @@ function runClaude({ claudePath, cwd, prompt, systemPrompt, tools, deny, model, 
   if (schema) args.push('--json-schema', JSON.stringify(schema));
 
   const started = Date.now();
-  const child = spawn(claudePath, args, { cwd, windowsHide: true, env: { ...process.env } });
+  const env = { ...process.env, LH_GUARD_ROOT: cwd, LH_GUARD_AUTHORITY: authority || 'observe' };
+  const child = spawn(claudePath, args, { cwd, windowsHide: true, env });
   // Background work must never compete with what the Leader is doing.
   try {
     os.setPriority(child.pid, os.constants.priority.PRIORITY_BELOW_NORMAL);
@@ -112,4 +162,4 @@ function runClaude({ claudePath, cwd, prompt, systemPrompt, tools, deny, model, 
   return { child, done };
 }
 
-module.exports = { runClaude, findClaude, detectRateLimit };
+module.exports = { runClaude, findClaude, detectRateLimit, guardPreflight, guardSettings };

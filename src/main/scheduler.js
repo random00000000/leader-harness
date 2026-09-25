@@ -178,11 +178,13 @@ class Scheduler {
       systemPrompt: P.persona(official),
       tools: perms.allow,
       deny: perms.deny,
+      authority: official.authority,
       model: official.model || undefined,
       schema,
       timeoutMin: s.settings.jobTimeoutMin,
     });
-    this.running.set(job.id, child);
+    // No child means the session never started (e.g. the guard is unavailable).
+    if (child) this.running.set(job.id, child);
     const outcome = await done;
     this.running.delete(job.id);
     const cancelled = this.cancelled.delete(job.id);
